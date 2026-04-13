@@ -3,1900 +3,1097 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-<!-- ═══════════ PWA META TAGS ═══════════ -->
-<title>زمین حساب - Zameen Hisab</title>
-<meta name="application-name" content="Zameen Hisab">
-<meta name="description" content="اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں">
-<meta name="theme-color" content="#1a5c2e">
+<title>زمین حساب — Zameen Hisab</title>
+<meta name="theme-color" content="#1b5e20">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="زمین حساب">
-<!-- manifest injected by JS only when hosted on GitHub Pages -->
-
-<!-- Apple touch icon (inline SVG data URI — no external file needed) -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231a5c2e'/><text x='50%' y='55%' font-size='100' text-anchor='middle' dominant-baseline='middle'>🌱</text></svg>">
-
-<!-- ═══════════ FONTS ═══════════
-     Loaded from Google Fonts online → service worker caches them.
-     If offline & not yet cached, body falls back gracefully to serif/sans-serif.
--->
-<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%231b5e20'/><text x='50%' y='55%' font-size='100' text-anchor='middle' dominant-baseline='middle'>🌱</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+/* ═══════════ DESIGN TOKENS ═══════════ */
 :root {
-  --green-dark: #1a5c2e;
-  --green-mid: #2d8a4e;
-  --green-light: #4caf73;
-  --green-pale: #e8f5ed;
-  --gold: #f5a623;
-  --gold-light: #fdf3e0;
-  --soil: #8B5E3C;
-  --soil-light: #f5ede6;
-  --sky: #2196c4;
-  --red: #e53935;
-  --white: #ffffff;
-  --gray-1: #f8faf9;
-  --gray-2: #eef2f0;
-  --gray-3: #c8d6ce;
-  --gray-4: #6b8c78;
-  --text: #1a2e23;
-  --text-light: #4a6556;
-  --shadow: 0 4px 20px rgba(26,92,46,0.12);
-  --shadow-lg: 0 8px 32px rgba(26,92,46,0.18);
-  --radius: 18px;
-  --radius-sm: 10px;
-  font-size: 16px;
+  --g1: #1b5e20; --g2: #2e7d32; --g3: #43a047; --g4: #a5d6a7; --g5: #e8f5e9;
+  --gold: #f9a825; --gold2: #fff8e1; --gold3: #ffe082;
+  --red: #c62828; --red2: #ffebee; --red3: #ef9a9a;
+  --blue: #1565c0; --blue2: #e3f2fd;
+  --soil: #5d4037; --soil2: #efebe9;
+  --ink: #1a2a1e; --ink2: #3d5246; --ink3: #6b8575;
+  --bg: #f1f8f2; --bg2: #ffffff; --bg3: #e8f5e9;
+  --border: #c8e6c9; --border2: #a5d6a7;
+  --shadow-sm: 0 2px 8px rgba(27,94,32,0.10);
+  --shadow: 0 4px 16px rgba(27,94,32,0.13);
+  --shadow-lg: 0 8px 32px rgba(27,94,32,0.18);
+  --r: 16px; --r-sm: 10px; --r-xs: 7px;
 }
-
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
 body {
   font-family: 'Noto Nastaliq Urdu', serif;
-  background: var(--gray-1);
-  color: var(--text);
+  background: var(--bg);
+  color: var(--ink);
   min-height: 100vh;
   max-width: 430px;
   margin: 0 auto;
-  position: relative;
   overflow-x: hidden;
 }
 
-/* ─── OFFLINE BANNER ─────────────────────── */
-#offlineBanner {
-  display: none;
-  background: #e65100;
-  color: white;
-  text-align: center;
-  padding: 8px 16px;
-  font-size: 0.8rem;
-  font-family: 'Noto Nastaliq Urdu', serif;
-  position: fixed;
-  top: 0; left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 430px;
-  z-index: 9999;
-}
-#offlineBanner.show { display: block; }
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--g4); border-radius: 4px; }
 
-/* ─── HEADER ─────────────────────────────────── */
-.app-header {
-  background: linear-gradient(135deg, var(--green-dark) 0%, var(--green-mid) 100%);
-  padding: 20px 20px 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+/* ═══ HEADER ═══ */
+.header {
+  background: linear-gradient(145deg, var(--g1) 0%, var(--g2) 60%, #33691e 100%);
+  padding: 18px 18px 0;
+  position: sticky; top: 0; z-index: 200;
+  box-shadow: 0 3px 20px rgba(0,0,0,0.22);
 }
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.app-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.logo-row { display:flex; align-items:center; gap:10px; }
 .logo-icon {
-  width: 42px; height: 42px;
-  background: var(--gold);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 2px 8px rgba(245,166,35,0.4);
+  width:44px; height:44px; background:var(--gold); border-radius:13px;
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+  box-shadow: 0 3px 10px rgba(249,168,37,0.45);
+  flex-shrink:0;
 }
-.logo-text { color: white; }
-.logo-text h1 { font-size: 1.3rem; font-weight: 700; font-family: 'Poppins', sans-serif; line-height: 1; }
-.logo-text span { font-size: 0.72rem; opacity: 0.85; display: block; }
-.header-date { color: rgba(255,255,255,0.8); font-size: 0.75rem; text-align: left; }
+.logo-name { color:white; }
+.logo-name h1 { font-size:1.25rem; font-weight:800; font-family:'Poppins',sans-serif; line-height:1; letter-spacing:-0.3px; }
+.logo-name small { font-size:0.68rem; opacity:0.8; display:block; margin-top:1px; }
+.header-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+#headerDate { color:rgba(255,255,255,0.75); font-size:0.7rem; font-family:'Poppins',sans-serif; }
 
-/* ─── TABS ─────────────────────────────────── */
-.tabs {
-  display: flex;
-  gap: 4px;
-  padding: 0 0 0;
-  overflow-x: auto;
-  scrollbar-width: none;
+/* ═══ NAV TABS ═══ */
+.nav-tabs { display:flex; gap:2px; overflow-x:auto; scrollbar-width:none; }
+.nav-tabs::-webkit-scrollbar { display:none; }
+.nav-tab {
+  flex:0 0 auto; padding:10px 15px 8px;
+  border:none; background:transparent;
+  color:rgba(255,255,255,0.58);
+  font-family:'Noto Nastaliq Urdu',serif;
+  font-size:0.82rem; cursor:pointer;
+  border-bottom:3px solid transparent;
+  border-radius:8px 8px 0 0;
+  transition:all 0.18s; white-space:nowrap;
 }
-.tabs::-webkit-scrollbar { display: none; }
-.tab-btn {
-  flex: 0 0 auto;
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.65);
-  font-family: 'Noto Nastaliq Urdu', serif;
-  font-size: 0.85rem;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  white-space: nowrap;
-  transition: all 0.2s;
-  border-radius: 8px 8px 0 0;
-}
-.tab-btn.active {
-  color: white;
-  background: rgba(255,255,255,0.12);
-  border-bottom-color: var(--gold);
-  font-weight: 600;
-}
-.tab-btn:hover:not(.active) { color: rgba(255,255,255,0.85); }
-
-/* ─── CONTENT ─────────────────────────────── */
-.tab-content { display: none; padding: 16px 16px 100px; }
-.tab-content.active {
-  display: block;
-  animation: slideUp 0.25s ease-out;
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+.nav-tab.active {
+  color:white; background:rgba(255,255,255,0.13);
+  border-bottom-color:var(--gold); font-weight:600;
 }
 
-/* ─── DESIGN POLISH ──────────────────────────── */
+/* ═══ BOTTOM NAV ═══ */
+.bottom-nav {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:430px;
+  background:white; border-top:1px solid var(--border);
+  display:flex; z-index:200;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.10);
+  padding-bottom: env(safe-area-inset-bottom,0);
+}
+.bn-btn {
+  flex:1; padding:9px 4px 5px; border:none; background:transparent;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  cursor:pointer; transition:all 0.15s;
+}
+.bn-btn .bn-icon { font-size:1.35rem; transition:transform 0.15s; }
+.bn-btn .bn-label { font-size:0.62rem; color:var(--ink3); font-family:'Noto Nastaliq Urdu',serif; }
+.bn-btn.active .bn-label { color:var(--g2); font-weight:700; }
+.bn-btn.active .bn-icon { transform:scale(1.1); }
+.bn-bar { width:20px; height:3px; background:var(--g2); border-radius:2px; margin:0 auto 1px; opacity:0; transition:opacity 0.15s; }
+.bn-btn.active .bn-bar { opacity:1; }
+
+/* ═══ PAGE CONTENT ═══ */
+.page { display:none; padding:14px 14px 90px; animation:pageIn 0.22s ease-out; }
+.page.active { display:block; }
+@keyframes pageIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ═══ CARDS ═══ */
 .card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: 0 2px 12px rgba(26,92,46,0.08), 0 1px 3px rgba(0,0,0,0.04);
-  margin-bottom: 14px;
-  transition: box-shadow 0.2s;
+  background:white; border-radius:var(--r);
+  padding:16px; margin-bottom:12px;
+  box-shadow:var(--shadow-sm);
+  border:1px solid rgba(200,230,201,0.5);
+  transition:box-shadow 0.2s;
 }
-.card:hover { box-shadow: 0 6px 24px rgba(26,92,46,0.14); }
-.card-title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--green-dark);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.card:focus-within { box-shadow:var(--shadow); }
+.card-hd {
+  display:flex; align-items:center; gap:8px;
+  font-size:0.92rem; font-weight:700; color:var(--g1);
+  margin-bottom:13px;
 }
-.card-title .icon { font-size: 1.2rem; }
-
-/* ─── FORM ELEMENTS ───────────────────────── */
-.form-group { margin-bottom: 14px; }
-label {
-  display: block;
-  font-size: 0.88rem;
-  color: var(--text-light);
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-input[type="number"], input[type="text"], select, textarea {
-  width: 100%;
-  padding: 13px 16px;
-  border: 2px solid var(--gray-2);
-  border-radius: var(--radius-sm);
-  font-family: 'Noto Nastaliq Urdu', serif;
-  font-size: 1rem;
-  color: var(--text);
-  background: var(--gray-1);
-  outline: none;
-  transition: border-color 0.2s;
-  direction: rtl;
-}
-input:focus, select:focus, textarea:focus {
-  border-color: var(--green-light);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(76,175,115,0.15);
-}
-select { cursor: pointer; appearance: none; }
-
-/* ─── BUTTONS ─────────────────────────────── */
-.btn {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: 'Noto Nastaliq Urdu', serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.btn-primary {
-  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
-  color: white;
-  box-shadow: 0 4px 14px rgba(45,138,78,0.35);
-}
-.btn-primary:active { transform: scale(0.97); box-shadow: none; }
-.btn-gold {
-  background: linear-gradient(135deg, var(--gold), #e8921a);
-  color: white;
-  box-shadow: 0 4px 14px rgba(245,166,35,0.35);
-  transition: all 0.2s;
-}
-.btn-gold:active { transform: scale(0.97); }
-.btn-outline {
-  background: transparent;
-  border: 2px solid var(--green-light);
-  color: var(--green-mid);
-  transition: all 0.2s;
-}
-.btn-outline:hover { background: var(--green-pale); }
-.btn-sm {
-  width: auto;
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  border-radius: 8px;
-}
-.btn-danger {
-  background: var(--red);
-  color: white;
+.card-hd .ic { font-size:1.15rem; }
+.card-hd .badge-tag {
+  margin-right:auto; font-size:0.65rem; font-weight:600;
+  background:var(--g5); color:var(--g2);
+  padding:2px 8px; border-radius:20px;
+  font-family:'Poppins',sans-serif;
 }
 
-/* ─── CROP SELECTOR ───────────────────────── */
-.crop-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 14px;
+/* ═══ INPUTS ═══ */
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.form-row.single { grid-template-columns:1fr; }
+.f-group { margin-bottom:10px; }
+.f-group:last-child { margin-bottom:0; }
+.f-label { display:block; font-size:0.78rem; color:var(--ink2); margin-bottom:5px; font-weight:500; }
+.f-input {
+  width:100%; padding:12px 14px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  font-family:'Noto Nastaliq Urdu',serif;
+  font-size:0.95rem; color:var(--ink);
+  background:var(--bg); outline:none;
+  transition:all 0.18s; direction:rtl;
 }
-.crop-card {
-  border: 2px solid var(--gray-2);
-  border-radius: var(--radius-sm);
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--gray-1);
+.f-input:focus {
+  border-color:var(--g3);
+  background:white;
+  box-shadow:0 0 0 3px rgba(67,160,71,0.12);
 }
-.crop-card:hover { border-color: var(--green-light); }
-.crop-card.selected {
-  border-color: var(--green-mid);
-  background: var(--green-pale);
+.f-input.num {
+  font-family:'Poppins',sans-serif;
+  font-size:1.05rem; font-weight:600; text-align:left; direction:ltr;
 }
-.crop-card .crop-emoji { font-size: 2rem; display: block; }
-.crop-card .crop-name { font-size: 0.82rem; color: var(--text); margin-top: 4px; font-weight: 600; }
-.crop-card .crop-season {
-  font-size: 0.7rem;
-  color: var(--text-light);
-  background: var(--gray-2);
-  border-radius: 20px;
-  padding: 2px 6px;
-  margin-top: 4px;
-  display: inline-block;
-}
-.crop-card.selected .crop-season { background: var(--green-light); color: white; }
+.f-hint { font-size:0.68rem; color:var(--ink3); margin-top:4px; line-height:1.4; }
 
-/* ─── RATIO SLIDER ──────────────────────────*/
-.ratio-display {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 12px 0;
+/* ═══ CROP SELECTOR ═══ */
+.crop-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+.crop-tile {
+  border:2px solid var(--border); border-radius:var(--r-sm);
+  padding:10px 6px; text-align:center;
+  cursor:pointer; transition:all 0.15s;
+  background:var(--bg);
 }
-.ratio-box {
-  padding: 12px;
-  border-radius: var(--radius-sm);
-  text-align: center;
+.crop-tile:active { transform:scale(0.95); }
+.crop-tile.sel { border-color:var(--g2); background:var(--g5); }
+.crop-tile .ce { font-size:1.8rem; display:block; }
+.crop-tile .cn { font-size:0.78rem; font-weight:600; margin-top:3px; }
+.crop-tile .cs {
+  font-size:0.62rem; margin-top:3px; display:inline-block;
+  background:var(--border); color:var(--ink2);
+  padding:1px 6px; border-radius:10px;
 }
-.ratio-box.zamindar { background: var(--gold-light); border: 2px solid var(--gold); }
-.ratio-box.haari { background: var(--green-pale); border: 2px solid var(--green-light); }
-.ratio-box .ratio-label { font-size: 0.78rem; color: var(--text-light); }
-.ratio-box .ratio-val { font-size: 1.5rem; font-weight: 700; }
-.ratio-box.zamindar .ratio-val { color: var(--gold); }
-.ratio-box.haari .ratio-val { color: var(--green-mid); }
-input[type="range"] {
-  width: 100%;
-  height: 6px;
-  appearance: none;
-  background: linear-gradient(to right, var(--gold) 0%, var(--gold) var(--val,50%), var(--green-light) var(--val,50%), var(--green-light) 100%);
-  border-radius: 3px;
-  outline: none;
-  cursor: pointer;
-  border: none;
-  padding: 0;
-}
-input[type="range"]::-webkit-slider-thumb {
-  appearance: none;
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: white;
-  border: 3px solid var(--green-mid);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
+.crop-tile.sel .cs { background:var(--g3); color:white; }
 
-/* ─── RESULTS ─────────────────────────────── */
-.result-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 14px;
+/* ═══ YIELD EDITABLE BADGE ═══ */
+.yield-badge {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--g5); border:1px solid var(--border2);
+  border-radius:var(--r-sm); padding:10px 13px; margin-top:6px;
 }
-.result-box {
-  border-radius: var(--radius-sm);
-  padding: 14px 12px;
-  text-align: center;
+.yield-badge .yb-label { font-size:0.78rem; color:var(--g1); }
+.yield-badge .yb-inputs { display:flex; align-items:center; gap:6px; }
+.yield-badge input {
+  width:60px; padding:6px 8px; border:1.5px solid var(--border2);
+  border-radius:6px; font-family:'Poppins',sans-serif;
+  font-size:0.88rem; font-weight:600; text-align:center;
+  background:white; outline:none; color:var(--g1);
+  direction:ltr;
 }
-.result-box .r-label { font-size: 0.78rem; color: var(--text-light); margin-bottom: 4px; }
-.result-box .r-val { font-size: 1.25rem; font-weight: 700; }
-.result-box.yield-box { background: var(--green-pale); }
-.result-box.yield-box .r-val { color: var(--green-dark); }
-.result-box.cost-box { background: var(--soil-light); }
-.result-box.cost-box .r-val { color: var(--soil); }
-.result-box.profit-box { background: #e8f4fd; }
-.result-box.profit-box .r-val { color: var(--sky); }
-.result-box.loss-box { background: #fdecea; }
-.result-box.loss-box .r-val { color: var(--red); }
+.yield-badge input:focus { border-color:var(--g2); }
+.yield-badge .yb-sep { color:var(--ink3); font-size:0.75rem; }
+.yield-badge .yb-unit { font-size:0.72rem; color:var(--ink3); }
 
-.share-box {
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* ═══ LIVE RESULT STRIP ═══ */
+.result-strip {
+  background:linear-gradient(135deg,var(--g1),var(--g2));
+  border-radius:var(--r-sm); padding:13px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:8px;
 }
-.share-box.zamindar-share { background: var(--gold-light); border: 2px solid var(--gold); }
-.share-box.haari-share { background: var(--green-pale); border: 2px solid var(--green-light); }
-.share-box .share-name { font-size: 0.9rem; font-weight: 600; }
-.share-box.zamindar-share .share-name { color: #8B6914; }
-.share-box.haari-share .share-name { color: var(--green-dark); }
-.share-box .share-amount { font-size: 1.2rem; font-weight: 700; }
-.share-box.zamindar-share .share-amount { color: var(--gold); }
-.share-box.haari-share .share-amount { color: var(--green-mid); }
+.rs-label { color:rgba(255,255,255,0.78); font-size:0.78rem; }
+.rs-value { color:white; font-size:1.2rem; font-weight:700; font-family:'Poppins',sans-serif; }
+.rs-unit { color:rgba(255,255,255,0.65); font-size:0.72rem; margin-top:1px; }
 
-.expense-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--gray-2);
-  font-size: 0.88rem;
-}
-.expense-row:last-child { border-bottom: none; }
-.expense-row .exp-name { color: var(--text-light); }
-.expense-row .exp-val { font-weight: 600; color: var(--text); }
+/* ═══ STAT BOXES ═══ */
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:8px; }
+.stat-grid.three { grid-template-columns:1fr 1fr 1fr; }
+.stat-box { border-radius:var(--r-sm); padding:13px 10px; text-align:center; }
+.stat-box .sb-val { font-size:1.15rem; font-weight:700; font-family:'Poppins',sans-serif; line-height:1; margin-bottom:3px; }
+.stat-box .sb-lbl { font-size:0.68rem; color:var(--ink2); }
+.stat-box .sb-sub { font-size:0.62rem; color:var(--ink3); margin-top:2px; }
+.sb-green { background:var(--g5); }
+.sb-green .sb-val { color:var(--g1); }
+.sb-gold { background:var(--gold2); }
+.sb-gold .sb-val { color:#e65100; }
+.sb-blue { background:var(--blue2); }
+.sb-blue .sb-val { color:var(--blue); }
+.sb-soil { background:var(--soil2); }
+.sb-soil .sb-val { color:var(--soil); }
+.sb-red { background:var(--red2); }
+.sb-red .sb-val { color:var(--red); }
+.sb-purple { background:#f3e5f5; }
+.sb-purple .sb-val { color:#6a1b9a; }
 
-/* ─── CUSTOM EXPENSES ──────────────────────── */
-.custom-exp-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 8px;
-  background: var(--gray-1);
-  border-radius: 8px;
-  padding: 8px;
-  border: 1px solid var(--gray-2);
+/* ═══ EXPENSES ═══ */
+.exp-row {
+  display:grid; grid-template-columns:1fr 0.85fr auto;
+  gap:7px; align-items:center;
+  background:var(--bg); border-radius:8px;
+  padding:7px; margin-bottom:6px;
+  border:1px solid var(--border);
+  animation:slideIn 0.2s ease-out;
 }
-.custom-exp-row input {
-  padding: 10px 12px;
-  font-size: 0.88rem;
-  border-radius: 8px;
+@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+.exp-row input { padding:9px 10px; font-size:0.85rem; border-radius:6px; }
+.exp-row .num { font-family:'Poppins',sans-serif; direction:ltr; text-align:left; }
+.del-btn {
+  width:32px; height:32px; border:none;
+  background:var(--red2); color:var(--red);
+  border-radius:7px; font-size:0.95rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all 0.15s;
 }
-.del-exp-btn {
-  width: 34px; height: 34px;
-  border: none;
-  background: #fdecea;
-  color: var(--red);
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+.del-btn:active { transform:scale(0.9); background:var(--red3); }
+.exp-total-row {
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--soil2); border-radius:var(--r-sm);
+  padding:12px 14px; margin-top:6px;
+  border:1.5px solid #bcaaa4;
 }
+.exp-total-row .et-label { font-size:0.88rem; font-weight:700; color:var(--soil); }
+.exp-total-row .et-val { font-size:1.15rem; font-weight:800; color:var(--soil); font-family:'Poppins',sans-serif; }
 
-/* ─── STEPS ───────────────────────────────── */
-.step-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--gray-2);
+/* ═══ FINAL SUMMARY ═══ */
+.summary-card {
+  background:linear-gradient(145deg,#1b5e20,#2e7d32,#1b5e20);
+  border-radius:var(--r); padding:18px; margin-bottom:12px;
+  position:relative; overflow:hidden;
 }
-.step-item:last-child { border-bottom: none; }
-.step-num {
-  width: 30px; height: 30px;
-  background: var(--green-mid);
-  color: white;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  font-family: 'Poppins', sans-serif;
+.summary-card::before {
+  content:'🌾'; position:absolute; right:-8px; bottom:-8px;
+  font-size:90px; opacity:0.08; pointer-events:none;
 }
-.step-content .step-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
-.step-content .step-desc { font-size: 0.78rem; color: var(--text-light); }
+.summary-card .sc-title { color:rgba(255,255,255,0.85); font-size:0.85rem; margin-bottom:14px; }
+.summary-card .sc-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.sc-box { background:rgba(255,255,255,0.12); border-radius:10px; padding:11px 10px; text-align:center; }
+.sc-box .scb-val { color:white; font-size:1.1rem; font-weight:700; font-family:'Poppins',sans-serif; line-height:1.1; }
+.sc-box .scb-lbl { color:rgba(255,255,255,0.65); font-size:0.67rem; margin-top:3px; }
 
-/* ─── NOTEBOOK ─────────────────────────────── */
-.note-item {
-  background: #fffef5;
-  border: 1px solid #e8e0b0;
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  margin-bottom: 10px;
+.profit-banner {
+  border-radius:var(--r-sm); padding:14px 16px; margin-top:10px;
+  display:flex; align-items:center; justify-content:space-between;
 }
-.note-date { font-size: 0.72rem; color: var(--text-light); margin-bottom: 6px; font-family: 'Poppins', sans-serif; }
-.note-text { font-size: 0.88rem; line-height: 1.6; }
-.note-actions { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+.profit-banner.gain { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); }
+.profit-banner.loss { background:rgba(198,40,40,0.35); border:1px solid rgba(198,40,40,0.5); }
+.profit-banner .pb-label { color:rgba(255,255,255,0.8); font-size:0.82rem; }
+.profit-banner .pb-val { font-size:1.3rem; font-weight:800; font-family:'Poppins',sans-serif; color:white; }
 
-/* ─── CALCULATOR ───────────────────────────── */
-.calc-display {
-  background: var(--green-dark);
-  border-radius: var(--radius-sm);
-  padding: 16px 20px;
-  text-align: right;
-  margin-bottom: 12px;
+/* ═══ NOTEBOOK ═══ */
+.note-card {
+  background:#fffef5; border:1px solid #e8e0a0;
+  border-radius:var(--r-sm); padding:12px; margin-bottom:9px;
+  animation:slideIn 0.2s ease-out;
 }
-.calc-expr { color: rgba(255,255,255,0.5); font-size: 0.85rem; min-height: 20px; font-family: 'Poppins', sans-serif; }
-.calc-result { color: white; font-size: 2.2rem; font-weight: 600; font-family: 'Poppins', sans-serif; word-break: break-all; }
-.calc-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-.calc-btn {
-  padding: 18px 8px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.1s;
-  font-family: 'Poppins', sans-serif;
-}
-.calc-btn:active { transform: scale(0.93); }
-.calc-btn.num { background: var(--gray-2); color: var(--text); }
-.calc-btn.op { background: var(--green-light); color: white; }
-.calc-btn.eq { background: var(--green-mid); color: white; }
-.calc-btn.clear { background: var(--red); color: white; }
-.calc-btn.zero { grid-column: span 2; }
-.calc-btn.backspace { background: var(--soil-light); color: var(--soil); }
+.note-card .nc-date { font-size:0.68rem; color:var(--ink3); font-family:'Poppins',sans-serif; margin-bottom:5px; }
+.note-card .nc-title { font-weight:700; font-size:0.88rem; margin-bottom:3px; }
+.note-card .nc-text { font-size:0.82rem; line-height:1.6; color:var(--ink2); }
+.note-card .nc-actions { display:flex; justify-content:flex-end; margin-top:7px; }
 
-/* ─── HISTORY ──────────────────────────────── */
-.history-item {
-  background: white;
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-bottom: 10px;
-  border-right: 4px solid var(--green-light);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+/* ═══ HISTORY ═══ */
+.hist-card {
+  background:white; border-radius:var(--r-sm); padding:13px; margin-bottom:9px;
+  border-right:4px solid var(--g3); box-shadow:var(--shadow-sm);
 }
-.history-item .h-date { font-size: 0.72rem; color: var(--text-light); font-family: 'Poppins', sans-serif; }
-.history-item .h-crop { font-size: 1rem; font-weight: 700; color: var(--green-dark); margin: 4px 0; }
-.history-item .h-stats { display: flex; gap: 12px; flex-wrap: wrap; }
-.history-item .h-stat { font-size: 0.78rem; color: var(--text-light); }
-.history-item .h-stat span { font-weight: 600; color: var(--text); }
+.hist-card .hc-date { font-size:0.68rem; color:var(--ink3); font-family:'Poppins',sans-serif; }
+.hist-card .hc-crop { font-size:0.95rem; font-weight:700; color:var(--g1); margin:3px 0; }
+.hist-card .hc-stats { display:flex; flex-wrap:wrap; gap:10px; }
+.hist-card .hcs { font-size:0.75rem; color:var(--ink3); }
+.hist-card .hcs span { font-weight:700; color:var(--ink); }
+.hist-card .hc-actions { display:flex; gap:6px; margin-top:8px; }
 
-/* ─── DASHBOARD ────────────────────────────── */
+/* ═══ DASHBOARD ═══ */
 .dash-hero {
-  background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
-  border-radius: var(--radius);
-  padding: 20px;
-  color: white;
-  margin-bottom: 14px;
-  position: relative;
-  overflow: hidden;
+  background:linear-gradient(145deg,var(--g1),var(--g2));
+  border-radius:var(--r); padding:18px; margin-bottom:12px;
+  position:relative; overflow:hidden;
 }
-.dash-hero::before {
-  content: '🌾';
-  position: absolute;
-  font-size: 80px;
-  right: -10px;
-  bottom: -10px;
-  opacity: 0.15;
+.dash-hero::after {
+  content:'🌾'; position:absolute; right:-5px; bottom:-5px;
+  font-size:80px; opacity:0.12; pointer-events:none;
 }
-.dash-hero h2 { font-size: 1.1rem; margin-bottom: 4px; }
-.dash-hero .welcome { font-size: 0.82rem; opacity: 0.8; margin-bottom: 16px; }
-.dash-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.dash-stat { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 8px; text-align: center; }
-.dash-stat .ds-val { font-size: 1rem; font-weight: 700; }
-.dash-stat .ds-lbl { font-size: 0.68rem; opacity: 0.8; margin-top: 2px; }
-
-.quick-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.quick-btn {
-  background: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 18px 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: all 0.2s;
-}
-.quick-btn:active { transform: scale(0.96); }
-.quick-btn .qb-icon { font-size: 1.8rem; }
-.quick-btn .qb-label { font-size: 0.85rem; font-weight: 600; color: var(--text); font-family: 'Noto Nastaliq Urdu', serif; }
+.dash-hero h2 { color:white; font-size:1.1rem; margin-bottom:2px; }
+.dash-hero p { color:rgba(255,255,255,0.75); font-size:0.78rem; margin-bottom:14px; }
+.dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.ds-box { background:rgba(255,255,255,0.14); border-radius:9px; padding:9px 7px; text-align:center; }
+.ds-val { color:white; font-size:0.95rem; font-weight:700; font-family:'Poppins',sans-serif; }
+.ds-lbl { color:rgba(255,255,255,0.65); font-size:0.62rem; margin-top:1px; }
 
 .tip-card {
-  background: linear-gradient(135deg, var(--gold-light), #fff8ec);
-  border: 1px solid #f0d080;
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  margin-bottom: 14px;
+  background:var(--gold2); border:1px solid var(--gold3);
+  border-radius:var(--r-sm); padding:12px; margin-bottom:12px;
 }
-.tip-card .tip-title { font-size: 0.88rem; font-weight: 700; color: #8B6914; margin-bottom: 6px; }
-.tip-card .tip-text { font-size: 0.82rem; color: #6b5010; line-height: 1.6; }
+.tip-card .tp-title { font-size:0.82rem; font-weight:700; color:#e65100; margin-bottom:5px; }
+.tip-card .tp-text { font-size:0.78rem; color:#5d4037; line-height:1.6; }
 
-/* ─── BOTTOM NAV ───────────────────────────── */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 430px;
-  background: white;
-  border-top: 1px solid var(--gray-2);
-  display: flex;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-  z-index: 200;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.nav-btn {
-  flex: 1;
-  padding: 10px 4px 6px;
-  border: none;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.nav-btn .nav-icon { font-size: 1.4rem; }
-.nav-btn .nav-label { font-size: 0.65rem; color: var(--gray-4); font-family: 'Noto Nastaliq Urdu', serif; }
-.nav-btn.active .nav-label { color: var(--green-mid); font-weight: 700; }
-.nav-indicator {
-  width: 20px; height: 3px;
-  background: var(--green-mid);
-  border-radius: 2px;
-  margin: 0 auto 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.nav-btn.active .nav-indicator { opacity: 1; }
+.season-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.season-tile { border-radius:var(--r-sm); padding:11px; text-align:center; }
+.season-tile .st-icon { font-size:1.5rem; }
+.season-tile .st-name { font-size:0.82rem; font-weight:700; margin:4px 0 2px; }
+.season-tile .st-months { font-size:0.68rem; color:var(--ink3); }
 
-/* ─── FOOTER ───────────────────────────────── */
-.dev-footer {
-  text-align: center;
-  font-size: 0.65rem;
-  color: var(--gray-3);
-  padding: 8px;
-  font-family: 'Poppins', sans-serif;
-  direction: ltr;
+/* ═══ CALCULATOR ═══ */
+.calc-display {
+  background:#1a2a1e; border-radius:14px;
+  padding:16px 18px; margin-bottom:12px; direction:ltr;
 }
-
-/* ─── BADGE ─────────────────────────────────── */
-.badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 600;
+.calc-expr { color:rgba(255,255,255,0.42); font-size:0.9rem; font-family:'Poppins',sans-serif; min-height:20px; text-align:right; }
+.calc-result { color:white; font-size:2.8rem; font-weight:700; font-family:'Poppins',sans-serif; text-align:right; line-height:1; word-break:break-all; margin-top:4px; }
+.calc-btns { display:grid; grid-template-columns:repeat(4,1fr); gap:9px; direction:ltr; }
+.cb {
+  padding:19px 6px; border:none; border-radius:12px;
+  font-size:1.25rem; font-weight:700; font-family:'Poppins',sans-serif;
+  cursor:pointer; transition:all 0.1s; user-select:none;
 }
-.badge-green { background: var(--green-pale); color: var(--green-dark); }
-.badge-gold { background: var(--gold-light); color: #8B6914; }
-.badge-red { background: #fdecea; color: var(--red); }
+.cb:active { transform:scale(0.91); }
+.cb.num { background:#eef2f0; color:#1a2a1e; }
+.cb.op { background:var(--g3); color:white; box-shadow:0 3px 8px rgba(67,160,71,0.28); }
+.cb.eq { background:linear-gradient(135deg,var(--g2),var(--g1)); color:white; box-shadow:0 4px 14px rgba(27,94,32,0.35); }
+.cb.clr { background:var(--red); color:white; box-shadow:0 3px 8px rgba(198,40,40,0.28); }
+.cb.bk { background:var(--soil2); color:var(--soil); }
+.cb.span2 { grid-column:span 2; }
 
-/* ─── TOGGLE ─────────────────────────────────── */
-.lang-toggle {
-  display: flex;
-  background: rgba(255,255,255,0.15);
-  border-radius: 8px;
-  overflow: hidden;
+/* ═══ BUTTONS ═══ */
+.btn {
+  width:100%; padding:14px; border:none; border-radius:var(--r-sm);
+  font-family:'Noto Nastaliq Urdu',serif; font-size:1rem; font-weight:700;
+  cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:7px;
 }
-.lang-btn {
-  padding: 4px 10px;
-  border: none;
-  background: transparent;
-  color: rgba(255,255,255,0.7);
-  font-size: 0.75rem;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-}
-.lang-btn.active { background: rgba(255,255,255,0.25); color: white; font-weight: 600; }
+.btn:active { transform:scale(0.97); }
+.btn-primary { background:linear-gradient(135deg,var(--g2),var(--g1)); color:white; box-shadow:0 4px 14px rgba(27,94,32,0.32); }
+.btn-gold { background:linear-gradient(135deg,var(--gold),#e65100); color:white; box-shadow:0 4px 14px rgba(249,168,37,0.32); }
+.btn-outline { background:transparent; border:2px solid var(--g3); color:var(--g2); }
+.btn-sm { width:auto; padding:7px 14px; font-size:0.8rem; border-radius:7px; }
+.btn-danger { background:var(--red); color:white; }
+.btn-outline:hover { background:var(--g5); }
 
-/* ─── ANIMATIONS ─────────────────────────────── */
-@keyframes fadeIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
-.fade-in { animation: fadeIn 0.3s ease-out; }
-@keyframes pulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.04) } }
-.pulse { animation: pulse 2s infinite; }
+/* ═══ DIVIDER ═══ */
+.divider { height:1px; background:var(--border); margin:12px 0; }
 
-.section-tag {
-  font-size: 0.72rem;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-  font-family: 'Poppins', sans-serif;
-}
-
-.divider { height: 1px; background: var(--gray-2); margin: 12px 0; }
-
+/* ═══ INFO BANNER ═══ */
 .info-banner {
-  background: var(--green-pale);
-  border: 1px solid var(--green-light);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  font-size: 0.82rem;
-  color: var(--green-dark);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  background:var(--g5); border:1px solid var(--border2);
+  border-radius:var(--r-sm); padding:9px 12px;
+  font-size:0.78rem; color:var(--g1); margin-bottom:10px;
+  display:flex; align-items:center; gap:7px;
 }
 
-/* ─── PWA INSTALL PROMPT ───────────────────── */
-#installPrompt {
-  display: none;
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 398px;
-  background: var(--green-dark);
-  color: white;
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  box-shadow: var(--shadow-lg);
-  z-index: 500;
-  align-items: center;
-  gap: 12px;
+/* ═══ STEP LIST ═══ */
+.step-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.step-item:last-child { border-bottom:none; }
+.step-num {
+  width:28px; height:28px; background:var(--g2); color:white;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:0.8rem; font-weight:700; flex-shrink:0;
+  font-family:'Poppins',sans-serif;
 }
-#installPrompt.show { display: flex; }
-#installPrompt .install-text { flex: 1; font-size: 0.85rem; }
-#installPrompt .install-text strong { display: block; margin-bottom: 2px; }
-#installBtn {
-  background: var(--gold);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-family: 'Noto Nastaliq Urdu', serif;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  font-size: 0.85rem;
+.step-title { font-weight:600; font-size:0.86rem; margin-bottom:2px; }
+.step-desc { font-size:0.74rem; color:var(--ink3); line-height:1.5; }
+
+/* ═══ MISC ═══ */
+.dev-footer { text-align:center; font-size:0.6rem; color:var(--ink3); padding:8px; font-family:'Poppins',sans-serif; direction:ltr; }
+.empty-state { text-align:center; padding:36px 16px; color:var(--ink3); }
+.empty-state .es-icon { font-size:3rem; margin-bottom:8px; }
+.empty-state p { font-size:0.82rem; }
+
+/* ═══ QUICK ACCES ═══ */
+.quick-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
+.quick-tile {
+  background:white; border:none; border-radius:var(--r-sm);
+  padding:16px 10px; display:flex; flex-direction:column;
+  align-items:center; gap:6px; cursor:pointer;
+  box-shadow:var(--shadow-sm); transition:all 0.15s;
 }
-#dismissInstall {
-  background: transparent;
-  border: none;
-  color: rgba(255,255,255,0.6);
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0 4px;
+.quick-tile:active { transform:scale(0.95); }
+.quick-tile .qt-icon { font-size:1.7rem; }
+.quick-tile .qt-label { font-size:0.82rem; font-weight:600; color:var(--ink); font-family:'Noto Nastaliq Urdu',serif; }
+
+/* ═══ OFFLINE BANNER ═══ */
+#offlineBanner {
+  display:none; background:#bf360c; color:white;
+  text-align:center; padding:7px 16px; font-size:0.75rem;
+  position:fixed; top:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:430px; z-index:9999;
+  font-family:'Noto Nastaliq Urdu',serif;
 }
+#offlineBanner.show { display:block; }
+
+/* ═══ PWA INSTALL ═══ */
+#installBanner {
+  display:none; position:fixed; bottom:76px; left:50%; transform:translateX(-50%);
+  width:calc(100% - 28px); max-width:402px;
+  background:var(--g1); color:white; border-radius:var(--r);
+  padding:14px 16px; box-shadow:var(--shadow-lg); z-index:300;
+  flex-direction:row; align-items:center; gap:10px;
+}
+#installBanner.show { display:flex; }
+#installBanner .ib-text { flex:1; font-size:0.8rem; }
+#installBanner .ib-text strong { display:block; margin-bottom:1px; }
+#installBanner .ib-btn { background:var(--gold); color:white; border:none; border-radius:8px; padding:8px 14px; font-family:'Noto Nastaliq Urdu',serif; font-weight:700; cursor:pointer; white-space:nowrap; font-size:0.82rem; }
+#installBanner .ib-close { background:transparent; border:none; color:rgba(255,255,255,0.6); font-size:1.2rem; cursor:pointer; padding:0 4px; }
+
+/* ═══ RESPONSIVE INPUT NUMBER ═══ */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { opacity:1; height:28px; }
 </style>
 </head>
 <body>
 
 <!-- OFFLINE BANNER -->
-<div id="offlineBanner">⚡ آپ آف لائن ہیں — ایپ مکمل کام کر رہی ہے</div>
+<div id="offlineBanner">⚡ آف لائن — ایپ مکمل کام کر رہی ہے</div>
 
-<!-- PWA INSTALL PROMPT -->
-<div id="installPrompt">
-  <div class="install-text">
-    <strong>ہوم اسکرین پر لگائیں</strong>
-    انٹرنیٹ کے بغیر بھی چلے گی
-  </div>
-  <button id="installBtn" onclick="installPWA()">انسٹال</button>
-  <button id="dismissInstall" onclick="document.getElementById('installPrompt').classList.remove('show')">✕</button>
+<!-- PWA INSTALL -->
+<div id="installBanner">
+  <div class="ib-text"><strong>ہوم اسکرین پر لگائیں</strong>بغیر انٹرنیٹ بھی چلے گی</div>
+  <button class="ib-btn" onclick="installPWA()">انسٹال</button>
+  <button class="ib-close" onclick="this.parentElement.classList.remove('show')">✕</button>
 </div>
 
 <!-- HEADER -->
-<header class="app-header">
+<header class="header">
   <div class="header-top">
-    <div class="app-logo">
+    <div class="logo-row">
       <div class="logo-icon">🌱</div>
-      <div class="logo-text">
+      <div class="logo-name">
         <h1>Zameen Hisab</h1>
-        <span>زمین حساب — ذہین کاشتکاری</span>
+        <small>زمین حساب — ذہین کاشتکاری</small>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-      <div class="lang-toggle">
-        <button class="lang-btn active" onclick="setLang('ur')">اردو</button>
-        <button class="lang-btn" onclick="setLang('en')">EN</button>
-      </div>
-      <div class="header-date" id="headerDate"></div>
+    <div class="header-right">
+      <div id="headerDate"></div>
     </div>
   </div>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('dashboard')">🏠 ڈیش بورڈ</button>
-    <button class="tab-btn" onclick="showTab('calculator')">🧮 حساب</button>
-    <button class="tab-btn" onclick="showTab('notebook')">📒 نوٹ بک</button>
-    <button class="tab-btn" onclick="showTab('history')">📋 تاریخ</button>
-    <button class="tab-btn" onclick="showTab('calc-simple')">➗ کیلکولیٹر</button>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dash',this)">🏠 ہوم</button>
+    <button class="nav-tab" onclick="showPage('calc',this)">🌾 حساب</button>
+    <button class="nav-tab" onclick="showPage('notes',this)">📒 نوٹس</button>
+    <button class="nav-tab" onclick="showPage('history',this)">📋 تاریخ</button>
+    <button class="nav-tab" onclick="showPage('calculator',this)">🔢 کیلکولیٹر</button>
   </div>
 </header>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" onclick="showTab('dashboard');setNav(this)">
-    <div class="nav-indicator"></div>
-    <div class="nav-icon">🏠</div>
-    <div class="nav-label">ہوم</div>
+  <button class="bn-btn active" id="bn-dash" onclick="showPage('dash',null);bnActive(this)">
+    <div class="bn-bar"></div><div class="bn-icon">🏠</div><div class="bn-label">ہوم</div>
   </button>
-  <button class="nav-btn" onclick="showTab('calculator');setNav(this)">
-    <div class="nav-indicator"></div>
-    <div class="nav-icon">🌾</div>
-    <div class="nav-label">حساب</div>
+  <button class="bn-btn" id="bn-calc" onclick="showPage('calc',null);bnActive(this)">
+    <div class="bn-bar"></div><div class="bn-icon">🌾</div><div class="bn-label">حساب</div>
   </button>
-  <button class="nav-btn" onclick="showTab('notebook');setNav(this)">
-    <div class="nav-indicator"></div>
-    <div class="nav-icon">📒</div>
-    <div class="nav-label">نوٹس</div>
+  <button class="bn-btn" id="bn-notes" onclick="showPage('notes',null);bnActive(this)">
+    <div class="bn-bar"></div><div class="bn-icon">📒</div><div class="bn-label">نوٹس</div>
   </button>
-  <button class="nav-btn" onclick="showTab('history');setNav(this)">
-    <div class="nav-indicator"></div>
-    <div class="nav-icon">📋</div>
-    <div class="nav-label">تاریخ</div>
+  <button class="bn-btn" id="bn-history" onclick="showPage('history',null);bnActive(this)">
+    <div class="bn-bar"></div><div class="bn-icon">📋</div><div class="bn-label">تاریخ</div>
   </button>
-  <button class="nav-btn" onclick="showTab('calc-simple');setNav(this)">
-    <div class="nav-indicator"></div>
-    <div class="nav-icon">➗</div>
-    <div class="nav-label">حسابیہ</div>
+  <button class="bn-btn" id="bn-calculator" onclick="showPage('calculator',null);bnActive(this)">
+    <div class="bn-bar"></div><div class="bn-icon">🔢</div><div class="bn-label">حسابیہ</div>
   </button>
 </nav>
 
-<!-- ══════════════════════════════════════════════ -->
-<!--  TAB 1: DASHBOARD                              -->
-<!-- ══════════════════════════════════════════════ -->
-<section class="tab-content active" id="tab-dashboard">
+<!-- ════════════════════════════════════════
+     PAGE 1: DASHBOARD
+════════════════════════════════════════ -->
+<div class="page active" id="page-dash">
   <div class="dash-hero">
-    <!-- ✅ UPDATED GREETING TEXT -->
     <h2>خوش آمدید! 👋</h2>
-    <p class="welcome">اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں</p>
+    <p>اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں</p>
     <div class="dash-stats">
-      <div class="dash-stat">
-        <div class="ds-val" id="dash-acres">-</div>
-        <div class="ds-lbl">ایکڑ زمین</div>
-      </div>
-      <div class="dash-stat">
-        <div class="ds-val" id="dash-crop">-</div>
-        <div class="ds-lbl">فصل</div>
-      </div>
-      <div class="dash-stat">
-        <div class="ds-val" id="dash-profit">-</div>
-        <div class="ds-lbl">منافع/نقصان</div>
-      </div>
+      <div class="ds-box"><div class="ds-val" id="d-acres">—</div><div class="ds-lbl">ایکڑ</div></div>
+      <div class="ds-box"><div class="ds-val" id="d-mann">—</div><div class="ds-lbl">کل من</div></div>
+      <div class="ds-box"><div class="ds-val" id="d-profit">—</div><div class="ds-lbl">منافع</div></div>
     </div>
   </div>
 
-  <div class="quick-btns">
-    <button class="quick-btn" onclick="showTab('calculator');setNavByIndex(1)">
-      <div class="qb-icon">🌾</div>
-      <div class="qb-label">فصل کا حساب</div>
+  <div class="quick-grid">
+    <button class="quick-tile" onclick="showPage('calc',null);bnActive(document.getElementById('bn-calc'))">
+      <div class="qt-icon">🌾</div><div class="qt-label">فصل کا حساب</div>
     </button>
-    <button class="quick-btn" onclick="showTab('notebook');setNavByIndex(2)">
-      <div class="qb-icon">📝</div>
-      <div class="qb-label">نوٹ لکھیں</div>
+    <button class="quick-tile" onclick="showPage('notes',null);bnActive(document.getElementById('bn-notes'))">
+      <div class="qt-icon">📝</div><div class="qt-label">نوٹ لکھیں</div>
     </button>
-    <button class="quick-btn" onclick="showTab('history');setNavByIndex(3)">
-      <div class="qb-icon">📋</div>
-      <div class="qb-label">پرانے ریکارڈ</div>
+    <button class="quick-tile" onclick="showPage('history',null);bnActive(document.getElementById('bn-history'))">
+      <div class="qt-icon">📋</div><div class="qt-label">پرانے ریکارڈ</div>
     </button>
-    <button class="quick-btn" onclick="showTab('calc-simple');setNavByIndex(4)">
-      <div class="qb-icon">🔢</div>
-      <div class="qb-label">کیلکولیٹر</div>
+    <button class="quick-tile" onclick="showPage('calculator',null);bnActive(document.getElementById('bn-calculator'))">
+      <div class="qt-icon">🔢</div><div class="qt-label">کیلکولیٹر</div>
     </button>
   </div>
 
   <div class="tip-card">
-    <div class="tip-title">💡 آج کی تجویز</div>
-    <div class="tip-text" id="dailyTip">گندم کے لیے بہترین وقت اکتوبر سے نومبر ہے۔ بیج بونے سے پہلے زمین کو اچھی طرح ہل کریں اور بیج کو 8-10 گھنٹے پانی میں بھگوئیں۔</div>
+    <div class="tp-title">💡 آج کی تجویز</div>
+    <div class="tp-text" id="dailyTip">—</div>
   </div>
 
   <div class="card">
-    <div class="card-title"><span class="icon">📊</span> موسم کی فصلیں</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:var(--green-pale);border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:1.6rem">🌾</div>
-        <div style="font-weight:700;font-size:0.88rem;color:var(--green-dark)">گندم</div>
-        <div><span class="badge badge-green">ربیع</span></div>
-        <div style="font-size:0.75rem;color:var(--text-light);margin-top:4px">اکتوبر - مارچ</div>
-      </div>
-      <div style="background:var(--soil-light);border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:1.6rem">🌾</div>
-        <div style="font-weight:700;font-size:0.88rem;color:var(--soil)">چاول</div>
-        <div><span class="badge badge-gold">خریف</span></div>
-        <div style="font-size:0.75rem;color:var(--text-light);margin-top:4px">جون - نومبر</div>
-      </div>
-      <div style="background:#f5e6f0;border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:1.6rem">🌿</div>
-        <div style="font-weight:700;font-size:0.88rem;color:#7b2d6e">کپاس</div>
-        <div><span class="badge" style="background:#f5e6f0;color:#7b2d6e">خریف</span></div>
-        <div style="font-size:0.75rem;color:var(--text-light);margin-top:4px">اپریل - نومبر</div>
-      </div>
-      <div style="background:#e8f4fd;border-radius:10px;padding:12px;text-align:center">
-        <div style="font-size:1.6rem">🌽</div>
-        <div style="font-weight:700;font-size:0.88rem;color:var(--sky)">مکئی</div>
-        <div><span class="badge" style="background:#e8f4fd;color:var(--sky)">خریف</span></div>
-        <div style="font-size:0.75rem;color:var(--text-light);margin-top:4px">مارچ - اگست</div>
-      </div>
+    <div class="card-hd"><span class="ic">📅</span> موسم کی فصلیں</div>
+    <div class="season-grid">
+      <div class="season-tile" style="background:#e8f5e9"><div class="st-icon">🌾</div><div class="st-name" style="color:#1b5e20">گندم</div><div style="font-size:0.65rem;background:#a5d6a7;color:#1b5e20;display:inline-block;padding:1px 7px;border-radius:10px;margin:2px 0">ربیع</div><div class="st-months">اکتوبر – مارچ</div></div>
+      <div class="season-tile" style="background:#fff8e1"><div class="st-icon">🍚</div><div class="st-name" style="color:#e65100">چاول</div><div style="font-size:0.65rem;background:#ffe082;color:#e65100;display:inline-block;padding:1px 7px;border-radius:10px;margin:2px 0">خریف</div><div class="st-months">جون – نومبر</div></div>
+      <div class="season-tile" style="background:#fce4ec"><div class="st-icon">🌿</div><div class="st-name" style="color:#880e4f">کپاس</div><div style="font-size:0.65rem;background:#f48fb1;color:#880e4f;display:inline-block;padding:1px 7px;border-radius:10px;margin:2px 0">خریف</div><div class="st-months">اپریل – نومبر</div></div>
+      <div class="season-tile" style="background:#e3f2fd"><div class="st-icon">🌽</div><div class="st-name" style="color:#0d47a1">مکئی</div><div style="font-size:0.65rem;background:#90caf9;color:#0d47a1;display:inline-block;padding:1px 7px;border-radius:10px;margin:2px 0">خریف</div><div class="st-months">مارچ – اگست</div></div>
     </div>
   </div>
   <div class="dev-footer">Developed by Muhammad Usman</div>
-</section>
+</div>
 
-<!-- ══════════════════════════════════════════════ -->
-<!--  TAB 2: CROP CALCULATOR                        -->
-<!-- ══════════════════════════════════════════════ -->
-<section class="tab-content" id="tab-calculator">
+<!-- ════════════════════════════════════════
+     PAGE 2: SMART CALCULATOR
+     Flow: Crop → Land → Production → Price → Bags → Expenses → Summary
+════════════════════════════════════════ -->
+<div class="page" id="page-calc">
+
+  <!-- STEP 1: CROP SELECTION -->
   <div class="card">
-    <div class="card-title"><span class="icon">🌱</span> فصل منتخب کریں</div>
+    <div class="card-hd"><span class="ic">🌱</span> فصل منتخب کریں <span class="badge-tag">Step 1</span></div>
     <div class="crop-grid">
-      <div class="crop-card selected" onclick="selectCrop('wheat',this)">
-        <span class="crop-emoji">🌾</span>
-        <div class="crop-name">گندم</div>
-        <div class="crop-season">ربیع</div>
+      <div class="crop-tile sel" onclick="setCrop('wheat',this)"><span class="ce">🌾</span><div class="cn">گندم</div><div class="cs">ربیع</div></div>
+      <div class="crop-tile" onclick="setCrop('rice',this)"><span class="ce">🍚</span><div class="cn">چاول</div><div class="cs">خریف</div></div>
+      <div class="crop-tile" onclick="setCrop('cotton',this)"><span class="ce">🌿</span><div class="cn">کپاس</div><div class="cs">خریف</div></div>
+      <div class="crop-tile" onclick="setCrop('maize',this)"><span class="ce">🌽</span><div class="cn">مکئی</div><div class="cs">خریف</div></div>
+      <div class="crop-tile" onclick="setCrop('sugarcane',this)"><span class="ce">🎋</span><div class="cn">گنا</div><div class="cs">سالانہ</div></div>
+      <div class="crop-tile" onclick="setCrop('mustard',this)"><span class="ce">🌼</span><div class="cn">سرسوں</div><div class="cs">ربیع</div></div>
+    </div>
+    <div class="info-banner" id="cropBanner">🌾 گندم | موسم: اکتوبر–مارچ | پیداوار: 35–40 من/ایکڑ</div>
+  </div>
+
+  <!-- STEP 2: LAND + YIELD -->
+  <div class="card">
+    <div class="card-hd"><span class="ic">📐</span> زمین اور پیداوار <span class="badge-tag">Step 2</span></div>
+    <div class="form-row">
+      <div class="f-group">
+        <label class="f-label">ایکڑ (رقبہ)</label>
+        <input type="number" class="f-input num" id="inAcres" value="2" min="0.5" step="0.5" placeholder="2" oninput="live()">
       </div>
-      <div class="crop-card" onclick="selectCrop('rice',this)">
-        <span class="crop-emoji">🍚</span>
-        <div class="crop-name">چاول</div>
-        <div class="crop-season">خریف</div>
-      </div>
-      <div class="crop-card" onclick="selectCrop('cotton',this)">
-        <span class="crop-emoji">🌿</span>
-        <div class="crop-name">کپاس</div>
-        <div class="crop-season">خریف</div>
-      </div>
-      <div class="crop-card" onclick="selectCrop('maize',this)">
-        <span class="crop-emoji">🌽</span>
-        <div class="crop-name">مکئی</div>
-        <div class="crop-season">خریف</div>
-      </div>
-      <div class="crop-card" onclick="selectCrop('sugarcane',this)">
-        <span class="crop-emoji">🎋</span>
-        <div class="crop-name">گنا</div>
-        <div class="crop-season">سالانہ</div>
-      </div>
-      <div class="crop-card" onclick="selectCrop('mustard',this)">
-        <span class="crop-emoji">🌼</span>
-        <div class="crop-name">سرسوں</div>
-        <div class="crop-season">ربیع</div>
+      <div class="f-group">
+        <label class="f-label">کل من (خودکار / خود لکھیں)</label>
+        <input type="number" class="f-input num" id="inMann" placeholder="خودکار" oninput="onMannEdit()">
       </div>
     </div>
-    <div id="cropInfoBanner" class="info-banner">
-      🌾 گندم — فی ایکڑ پیداوار: 35-40 من | موسم: اکتوبر سے مارچ
+    <!-- Editable yield per acre -->
+    <div class="yield-badge">
+      <div class="yb-label">فی ایکڑ پیداوار (من)</div>
+      <div class="yb-inputs">
+        <input type="number" id="yieldMin" value="35" min="1" oninput="live()">
+        <span class="yb-sep">–</span>
+        <input type="number" id="yieldMax" value="40" min="1" oninput="live()">
+        <span class="yb-unit">من</span>
+      </div>
+    </div>
+    <div class="result-strip" style="margin-top:10px">
+      <div><div class="rs-label">خودکار پیداوار</div><div class="rs-unit" id="yieldRange">35–40 من × 2 ایکڑ</div></div>
+      <div style="text-align:left"><div class="rs-value" id="res-mann">—</div><div class="rs-unit">کل من</div></div>
     </div>
   </div>
 
+  <!-- STEP 3: PRICE + TOTAL VALUE -->
   <div class="card">
-    <div class="card-title"><span class="icon">💰</span> زمین اور قیمت</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div>
-        <label style="font-size:0.82rem;color:var(--text-light);margin-bottom:5px;display:block">ایکڑ (رقبہ)</label>
-        <input type="number" id="acreInput" min="0.5" max="500" step="0.5" value="2" placeholder="ایکڑ" oninput="onAcresChange()" style="padding:12px 14px;font-size:1rem">
+    <div class="card-hd"><span class="ic">💰</span> قیمت اور آمدنی <span class="badge-tag">Step 3</span></div>
+    <div class="form-row">
+      <div class="f-group">
+        <label class="f-label" id="priceLbl">گندم قیمت فی من (₨)</label>
+        <input type="number" class="f-input num" id="inPrice" value="4000" placeholder="4000" oninput="live()">
       </div>
-      <div>
-        <label style="font-size:0.82rem;color:var(--text-light);margin-bottom:5px;display:block" id="priceLabel">قیمت فی من (₨)</label>
-        <input type="number" id="priceInput" value="4000" oninput="autoCalculate();quickBagsCalc()" placeholder="فی من" style="padding:12px 14px;font-size:1rem">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>بوری کا وزن (کلو)</label>
-      <input type="number" id="bagWeight" value="40" min="1" max="100" oninput="autoCalculate();quickBagsCalc()" placeholder="مثلاً: 40">
-      <div style="font-size:0.72rem;color:var(--text-light);margin-top:4px">گندم ≈ 40 &nbsp;|&nbsp; چاول ≈ 50 &nbsp;|&nbsp; کپاس ≈ 70 کلو فی بوری</div>
-    </div>
-
-    <!-- ─── QUICK MAN→BAGS CALCULATOR ─── -->
-    <div style="background:linear-gradient(135deg,#fff8ec,#fdf3e0);border:1.5px solid #f0d080;border-radius:var(--radius-sm);padding:14px;margin-top:4px">
-      <div style="font-size:0.82rem;font-weight:700;color:#8B6914;margin-bottom:10px">🧮 فوری حساب — من سے بوریاں</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <label style="font-size:0.75rem;color:var(--text-light);margin-bottom:4px;display:block">کتنے من اناج؟</label>
-          <input type="number" id="quickMan" min="0" step="0.5" placeholder="مثلاً: 20" oninput="quickBagsCalc()" style="font-size:1rem;padding:10px 12px">
-        </div>
-        <div>
-          <label style="font-size:0.75rem;color:var(--text-light);margin-bottom:4px;display:block">من کا ریٹ (روپے)</label>
-          <input type="number" id="quickRate" min="0" placeholder="اوپر سے لے گا" oninput="quickBagsCalc()" style="font-size:1rem;padding:10px 12px">
-        </div>
-      </div>
-      <div id="quickBagsResult" style="display:none;background:white;border-radius:8px;padding:12px">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
-          <div style="background:var(--green-pale);border-radius:8px;padding:10px">
-            <div style="font-size:1.3rem;font-weight:700;color:var(--green-dark)" id="qr-bags">-</div>
-            <div style="font-size:0.68rem;color:var(--text-light)">بوریاں</div>
-          </div>
-          <div style="background:var(--gold-light);border-radius:8px;padding:10px">
-            <div style="font-size:1.1rem;font-weight:700;color:#8B6914" id="qr-perbag">-</div>
-            <div style="font-size:0.68rem;color:var(--text-light)">قیمت/بوری</div>
-          </div>
-          <div style="background:#f3f0ff;border-radius:8px;padding:10px">
-            <div style="font-size:1.1rem;font-weight:700;color:#6b4cc4" id="qr-total">-</div>
-            <div style="font-size:0.68rem;color:var(--text-light)">کل رقم</div>
-          </div>
-        </div>
-        <div style="font-size:0.75rem;color:var(--text-light);text-align:center;margin-top:8px;line-height:1.6" id="qr-formula">—</div>
+      <div class="f-group">
+        <label class="f-label">کل آمدنی</label>
+        <div class="f-input num" id="res-revenue" style="background:#e8f5e9;border-color:#a5d6a7;color:#1b5e20;font-weight:700;display:flex;align-items:center">—</div>
       </div>
     </div>
   </div>
 
-  <!-- CUSTOM EXPENSES MANAGER -->
+  <!-- STEP 4: BAGS -->
   <div class="card">
-    <div class="card-title"><span class="icon">📋</span> اخراجات — خود ترتیب دیں</div>
-    <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:12px;background:var(--green-pale);padding:8px 12px;border-radius:8px">
-      ✏️ اخراجات کے نام اور رقم خود تبدیل کر سکتے ہیں — یا نئے اخراجات شامل کریں
+    <div class="card-hd"><span class="ic">🎒</span> بوریاں <span class="badge-tag">Step 4</span></div>
+    <div class="f-group">
+      <label class="f-label">ہر بوری کا وزن (کلو) — خود تبدیل کریں</label>
+      <input type="number" class="f-input num" id="inBagKg" value="102" min="1" placeholder="102" oninput="live()">
+      <div class="f-hint">1 من = 40 کلو | گندم ≈ 100–102 کلو/بوری | چاول ≈ 80 کلو | کپاس ≈ 70 کلو</div>
     </div>
-    <div id="customExpensesList"></div>
-    <button class="btn btn-outline" onclick="addCustomExpense()" style="margin-top:10px;font-size:0.9rem">
+    <div class="stat-grid three" style="margin-top:6px">
+      <div class="stat-box sb-green"><div class="sb-val" id="res-totalkg">—</div><div class="sb-lbl">کل کلو</div></div>
+      <div class="stat-box sb-blue"><div class="sb-val" id="res-bags">—</div><div class="sb-lbl">کل بوریاں</div></div>
+      <div class="stat-box sb-gold"><div class="sb-val" id="res-perbag">—</div><div class="sb-lbl">₨ / بوری</div></div>
+    </div>
+    <div class="f-hint" id="bagFormula" style="margin-top:8px;background:var(--bg);padding:7px 10px;border-radius:7px;text-align:center">—</div>
+  </div>
+
+  <!-- STEP 5: EXPENSES -->
+  <div class="card">
+    <div class="card-hd"><span class="ic">📋</span> اخراجات — خود ترتیب دیں <span class="badge-tag">Step 5</span></div>
+    <div style="font-size:0.75rem;color:var(--ink2);background:var(--g5);padding:7px 10px;border-radius:7px;margin-bottom:10px">
+      ✏️ نام اور رقم خود لکھیں — کوئی بھی خرچہ شامل / ہٹا سکتے ہیں
+    </div>
+    <div id="expList"></div>
+    <button class="btn btn-outline" onclick="addExp()" style="margin-top:6px;font-size:0.85rem">
       ➕ نیا خرچہ شامل کریں
     </button>
+    <div class="exp-total-row" style="margin-top:10px">
+      <span class="et-label">📊 کل اخراجات</span>
+      <span class="et-val" id="res-totalexp">₨ 0</span>
+    </div>
   </div>
 
-  <!-- shareSlider hidden — default 50/50, kept for JS compatibility -->
-  <input type="hidden" id="shareSlider" value="50">
-
-  <button class="btn btn-primary pulse" onclick="calculateAll()" style="margin-bottom:14px;font-size:1.1rem">
-    ⚡ حساب لگائیں
-  </button>
-
-  <div class="card fade-in" id="resultsCard" style="display:none">
-    <div class="card-title"><span class="icon">📊</span> نتائج</div>
-    <div class="result-grid">
-      <div class="result-box yield-box">
-        <div class="r-label">کل پیداوار</div>
-        <div class="r-val" id="res-yield">-</div>
-        <div style="font-size:0.72rem;color:var(--green-mid)">من</div>
-      </div>
-      <div class="result-box cost-box">
-        <div class="r-label">کل اخراجات</div>
-        <div class="r-val" id="res-cost">-</div>
-        <div style="font-size:0.72rem;color:var(--soil)">روپے</div>
-      </div>
-      <div class="result-box" id="profitLossBox">
-        <div class="r-label" id="profitLossLabel">منافع</div>
-        <div class="r-val" id="res-profit">-</div>
-        <div style="font-size:0.72rem" id="profitLossSub">روپے</div>
-      </div>
-      <div class="result-box" style="background:#f3f0ff">
-        <div class="r-label">آمدنی</div>
-        <div class="r-val" id="res-revenue" style="color:#6b4cc4">-</div>
-        <div style="font-size:0.72rem;color:#6b4cc4">روپے</div>
-      </div>
+  <!-- STEP 6: FINAL SUMMARY -->
+  <div class="summary-card" id="summaryCard">
+    <div class="sc-title">📊 حتمی خلاصہ — Final Summary</div>
+    <div class="sc-grid">
+      <div class="sc-box"><div class="scb-val" id="sum-mann">—</div><div class="scb-lbl">کل پیداوار (من)</div></div>
+      <div class="sc-box"><div class="scb-val" id="sum-rev">—</div><div class="scb-lbl">کل آمدنی (₨)</div></div>
+      <div class="sc-box"><div class="scb-val" id="sum-bags">—</div><div class="scb-lbl">کل بوریاں</div></div>
+      <div class="sc-box"><div class="scb-val" id="sum-exp">—</div><div class="scb-lbl">کل اخراجات (₨)</div></div>
     </div>
-
-    <!-- ══ BAGS / BORI SECTION ══ -->
-    <div class="divider"></div>
-    <div class="card-title" style="margin-bottom:10px"><span class="icon">🎒</span> بوریاں</div>
-    <div style="background:linear-gradient(135deg,#e8f5ed,#d4edda);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
-        <div>
-          <div style="font-size:1.6rem">🎒</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--green-dark)" id="res-bags">-</div>
-          <div style="font-size:0.72rem;color:var(--text-light)">کل بوریاں</div>
-        </div>
-        <div>
-          <div style="font-size:1.6rem">⚖️</div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--soil)" id="res-bagwt">-</div>
-          <div style="font-size:0.72rem;color:var(--text-light)">کلو/بوری</div>
-        </div>
-        <div>
-          <div style="font-size:1.6rem">💵</div>
-          <div style="font-size:1.1rem;font-weight:700;color:#6b4cc4" id="res-bagprice">-</div>
-          <div style="font-size:0.72rem;color:var(--text-light)">قیمت/بوری</div>
-        </div>
-      </div>
-      <div style="margin-top:10px;background:white;border-radius:8px;padding:10px;font-size:0.82rem;color:var(--text-light);text-align:center">
-        <span id="res-bagsummary">—</span>
-      </div>
+    <div class="profit-banner gain" id="profitBanner">
+      <div class="pb-label" id="profitLabel">💰 خالص منافع</div>
+      <div class="pb-val" id="sum-profit">—</div>
     </div>
-
-    <button class="btn btn-gold" onclick="saveRecord()" style="margin-top:12px">
-      💾 ریکارڈ محفوظ کریں
-    </button>
   </div>
+
+  <!-- STEP 7: SAVE + FARMING STEPS -->
+  <button class="btn btn-gold" onclick="saveRec()" style="margin-bottom:12px">💾 ریکارڈ محفوظ کریں</button>
 
   <div class="card" id="stepsCard">
-    <div class="card-title"><span class="icon">📝</span> کاشتکاری کے مراحل</div>
-    <div id="farmingSteps"></div>
+    <div class="card-hd"><span class="ic">📝</span> کاشتکاری کے مراحل</div>
+    <div id="farmSteps"></div>
   </div>
-  <div class="dev-footer">Developed by Muhammad Usman</div>
-</section>
 
-<!-- ══════════════════════════════════════════════ -->
-<!--  TAB 3: NOTEBOOK                               -->
-<!-- ══════════════════════════════════════════════ -->
-<section class="tab-content" id="tab-notebook">
+  <div class="dev-footer">Developed by Muhammad Usman</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE 3: NOTEBOOK
+════════════════════════════════════════ -->
+<div class="page" id="page-notes">
   <div class="card">
-    <div class="card-title"><span class="icon">✏️</span> نیا نوٹ لکھیں</div>
-    <div class="form-group">
-      <label>عنوان (اختیاری)</label>
-      <input type="text" id="noteTitle" placeholder="مثلاً: آج کے اخراجات">
+    <div class="card-hd"><span class="ic">✏️</span> نیا نوٹ لکھیں</div>
+    <div class="f-group">
+      <label class="f-label">عنوان (اختیاری)</label>
+      <input type="text" class="f-input" id="noteTitle" placeholder="مثلاً: آج کے اخراجات">
     </div>
-    <div class="form-group">
-      <label>نوٹ لکھیں</label>
-      <textarea id="noteText" rows="4" placeholder="یہاں لکھیں..." style="resize:none"></textarea>
+    <div class="f-group">
+      <label class="f-label">نوٹ</label>
+      <textarea class="f-input" id="noteText" rows="4" placeholder="یہاں لکھیں…" style="resize:none"></textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveNote()">💾 نوٹ محفوظ کریں</button>
+    <button class="btn btn-primary" onclick="saveNote()">💾 محفوظ کریں</button>
   </div>
-
-  <div class="card-title" style="padding: 0 4px 8px">
-    <span class="icon">📒</span> میرے نوٹس
-  </div>
-  <div id="notesList">
-    <div style="text-align:center;padding:30px;color:var(--gray-3)">
-      <div style="font-size:2.5rem">📝</div>
-      <div style="margin-top:8px">ابھی کوئی نوٹ نہیں ہے</div>
-    </div>
-  </div>
+  <div class="card-hd" style="padding:0 4px 8px"><span class="ic">📒</span> میرے نوٹس</div>
+  <div id="notesList"></div>
   <div class="dev-footer">Developed by Muhammad Usman</div>
-</section>
+</div>
 
-<!-- ══════════════════════════════════════════════ -->
-<!--  TAB 4: HISTORY                                -->
-<!-- ══════════════════════════════════════════════ -->
-<section class="tab-content" id="tab-history">
-  <div class="card-title" style="padding: 0 4px 12px">
-    <span class="icon">📋</span> پرانے حسابات
-  </div>
-  <div id="historyList">
-    <div style="text-align:center;padding:40px;color:var(--gray-3)">
-      <div style="font-size:3rem">📊</div>
-      <div style="margin-top:8px">ابھی کوئی ریکارڈ نہیں<br>پہلے حساب لگائیں اور محفوظ کریں</div>
-    </div>
-  </div>
+<!-- ════════════════════════════════════════
+     PAGE 4: HISTORY
+════════════════════════════════════════ -->
+<div class="page" id="page-history">
+  <div class="card-hd" style="padding:0 4px 10px"><span class="ic">📋</span> پرانے حسابات</div>
+  <div id="histList"></div>
   <div class="dev-footer">Developed by Muhammad Usman</div>
-</section>
+</div>
 
-<!-- ══════════════════════════════════════════════ -->
-<!--  TAB 5: SIMPLE CALCULATOR                      -->
-<!-- ══════════════════════════════════════════════ -->
-<section class="tab-content" id="tab-calc-simple">
+<!-- ════════════════════════════════════════
+     PAGE 5: CALCULATOR
+════════════════════════════════════════ -->
+<div class="page" id="page-calculator">
   <div class="card">
-    <div class="card-title"><span class="icon">🔢</span> کیلکولیٹر</div>
-
-    <!-- Display -->
-    <div style="background:#1a2e23;border-radius:14px;padding:16px 20px;margin-bottom:14px;direction:ltr">
-      <div id="calcExpr" style="color:rgba(255,255,255,0.45);font-size:0.9rem;font-family:'Poppins',sans-serif;min-height:22px;text-align:right;letter-spacing:1px"></div>
-      <div id="calcResult" style="color:white;font-size:2.6rem;font-weight:600;font-family:'Poppins',sans-serif;text-align:right;line-height:1.1;word-break:break-all;margin-top:4px">0</div>
+    <div class="card-hd"><span class="ic">🔢</span> کیلکولیٹر</div>
+    <div class="calc-display">
+      <div class="calc-expr" id="cExpr"></div>
+      <div class="calc-result" id="cResult">0</div>
     </div>
+    <div class="calc-btns">
+      <button class="cb clr" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cClear()">C</button>
+      <button class="cb bk"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cBack()">⌫</button>
+      <button class="cb op"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cOp('%')">%</button>
+      <button class="cb op"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cOp('÷')">÷</button>
 
-    <!-- Buttons -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;direction:ltr">
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('7')">7</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('8')">8</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('9')">9</button>
+      <button class="cb op"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cOp('×')">×</button>
 
-      <!-- Row 1 -->
-      <button onclick="calcClear()"
-        style="background:#e53935;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.1rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(229,57,53,0.3)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">C</button>
-      <button onclick="calcBack()"
-        style="background:#f5ede6;color:#8B5E3C;border:none;border-radius:12px;padding:20px 8px;font-size:1.2rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">⌫</button>
-      <button onclick="calcOp('%')"
-        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.2rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">%</button>
-      <button onclick="calcOp('÷')"
-        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.3rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">÷</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('4')">4</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('5')">5</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('6')">6</button>
+      <button class="cb op"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cOp('-')">−</button>
 
-      <!-- Row 2 -->
-      <button onclick="calcNum('7')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">7</button>
-      <button onclick="calcNum('8')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">8</button>
-      <button onclick="calcNum('9')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">9</button>
-      <button onclick="calcOp('×')"
-        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.3rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">×</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('1')">1</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('2')">2</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('3')">3</button>
+      <button class="cb op"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cOp('+')">+</button>
 
-      <!-- Row 3 -->
-      <button onclick="calcNum('4')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">4</button>
-      <button onclick="calcNum('5')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">5</button>
-      <button onclick="calcNum('6')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">6</button>
-      <button onclick="calcOp('-')"
-        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.5rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">−</button>
-
-      <!-- Row 4 -->
-      <button onclick="calcNum('1')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">1</button>
-      <button onclick="calcNum('2')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">2</button>
-      <button onclick="calcNum('3')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">3</button>
-      <button onclick="calcOp('+')"
-        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.4rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">+</button>
-
-      <!-- Row 5 -->
-      <button onclick="calcNum('0')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;grid-column:span 2"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">0</button>
-      <button onclick="calcNum('.')"
-        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.5rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">.</button>
-      <button onclick="calcEquals()"
-        style="background:linear-gradient(135deg,#2d8a4e,#1a5c2e);color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.4rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 4px 14px rgba(26,92,46,0.4)"
-        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">=</button>
+      <button class="cb num span2" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('0')">0</button>
+      <button class="cb num" ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cNum('.')">.</button>
+      <button class="cb eq"  ontouchstart="this.style.transform='scale(0.91)'" ontouchend="this.style.transform=''" onclick="cEq()">=</button>
     </div>
   </div>
   <div class="dev-footer">Developed by Muhammad Usman</div>
-</section>
+</div>
 
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
 <script>
-// ══════════════════════════════════════════════════
-// INLINE MANIFEST (no manifest.json file needed)
-// ══════════════════════════════════════════════════
-(function injectManifest() {
-  try {
-    const manifest = {
-      name: 'زمین حساب — Zameen Hisab',
-      short_name: 'زمین حساب',
-      description: 'اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں',
-      start_url: './',
-      display: 'standalone',
-      orientation: 'portrait',
-      background_color: '#1a5c2e',
-      theme_color: '#1a5c2e',
-      lang: 'ur',
-      icons: [{
-        src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%231a5c2e'/><text x='50%' y='55%' font-size='110' text-anchor='middle' dominant-baseline='middle'>🌱</text></svg>",
-        sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable'
-      }]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('link');
-    link.rel = 'manifest'; link.href = url;
-    document.head.appendChild(link);
-  } catch(e) {}
+// ─── PWA INLINE SERVICE WORKER ────────────────────
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  const code=`const C='zh-v3';self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(['/']).catch(()=>{})))});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(c=>{if(c)return c;return fetch(e.request).then(r=>{if(r&&r.status===200&&r.type!=='opaque'){const cl=r.clone();caches.open(C).then(ca=>ca.put(e.request,cl))}return r}).catch(()=>c||new Response('Offline',{status:503}))}))});`;
+  try{const b=new Blob([code],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(b),{scope:'/'}).catch(()=>{});}catch(e){}
 })();
 
-// ══════════════════════════════════════════════════
-// SERVICE WORKER — INLINE BLOB
-// No external sw.js needed. Works on GitHub Pages,
-// direct file open, Claude preview — everywhere.
-// ══════════════════════════════════════════════════
-(function registerInlineSW() {
-  if (!('serviceWorker' in navigator)) return;
-
-  const SW_CODE = `
-const CACHE = 'zameen-hisab-v2';
-self.addEventListener('install', e => {
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])).catch(()=>{}));
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
-    ).then(()=>self.clients.claim())
-  );
-});
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (res && res.status === 200 && res.type !== 'opaque') {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
-        return res;
-      }).catch(() => cached || new Response('Offline', {status:503}));
-    })
-  );
-});
-`;
-
-  try {
-    const blob = new Blob([SW_CODE], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl, { scope: '/' })
-      .then(() => console.log('✅ Inline SW registered'))
-      .catch(() => {/* silent — scoping restrictions on some hosts */});
-  } catch(e) { /* silent */ }
+// ─── INLINE MANIFEST ──────────────────────────────
+(function(){
+  try{
+    const m={name:'زمین حساب — Zameen Hisab',short_name:'زمین حساب',description:'فصل کا مکمل حساب',start_url:'./',display:'standalone',orientation:'portrait',background_color:'#1b5e20',theme_color:'#1b5e20',lang:'ur',icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%231b5e20'/><text x='50%' y='55%' font-size='110' text-anchor='middle' dominant-baseline='middle'>🌱</text></svg>",sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'}]};
+    const b=new Blob([JSON.stringify(m)],{type:'application/json'});
+    const l=document.createElement('link');l.rel='manifest';l.href=URL.createObjectURL(b);document.head.appendChild(l);
+  }catch(e){}
 })();
 
-// ══════════════════════════════════════════════════
-// PWA INSTALL PROMPT
-// ══════════════════════════════════════════════════
-let deferredInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
-  // Show install banner after 3 seconds
-  setTimeout(() => {
-    document.getElementById('installPrompt').classList.add('show');
-  }, 3000);
-});
+// ─── PWA INSTALL ──────────────────────────────────
+let _dip=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();_dip=e;setTimeout(()=>document.getElementById('installBanner').classList.add('show'),4000);});
+function installPWA(){if(!_dip)return;_dip.prompt();_dip.userChoice.then(()=>{_dip=null;document.getElementById('installBanner').classList.remove('show');});}
+window.addEventListener('appinstalled',()=>document.getElementById('installBanner').classList.remove('show'));
 
-function installPWA() {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.then(result => {
-    deferredInstallPrompt = null;
-    document.getElementById('installPrompt').classList.remove('show');
-  });
+// ─── OFFLINE ──────────────────────────────────────
+function chkOnline(){
+  const b=document.getElementById('offlineBanner');
+  const h=document.querySelector('.header');
+  if(!navigator.onLine){b.classList.add('show');h.style.top='30px';}
+  else{b.classList.remove('show');h.style.top='0';}
 }
+window.addEventListener('online',chkOnline);
+window.addEventListener('offline',chkOnline);
+chkOnline();
 
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installPrompt').classList.remove('show');
-  deferredInstallPrompt = null;
-});
+// ─── STORAGE ──────────────────────────────────────
+const LS={get:k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}}}
 
-// ══════════════════════════════════════════════════
-// OFFLINE / ONLINE DETECTION
-// ══════════════════════════════════════════════════
-function updateOnlineStatus() {
-  const banner = document.getElementById('offlineBanner');
-  if (!navigator.onLine) {
-    banner.classList.add('show');
-    // Push content down so banner doesn't overlap header
-    document.querySelector('.app-header').style.top = '36px';
-  } else {
-    banner.classList.remove('show');
-    document.querySelector('.app-header').style.top = '0';
-  }
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-updateOnlineStatus(); // run on load
-
-// ══════════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════════
+// ─── CROP DATA ────────────────────────────────────
 const CROPS = {
-  wheat: {
-    name: 'گندم', emoji: '🌾', season: 'ربیع (اکتوبر-مارچ)',
-    yieldMin: 35, yieldMax: 40, defaultPrice: 4000,
-    costs: {
-      'زمین کی تیاری (ہل، روٹا ویٹر)': 3500,
-      'بیج (بذر)': 2500,
-      'کھاد (DAP + یوریا)': 6000,
-      'پانی / آبپاشی': 3000,
-      'زرعی زہر (سپرے)': 1500,
-      'مزدوری / کٹائی': 4000,
-      'گہائی (تھریشر)': 2000,
-    },
-    steps: [
-      {t:'زمین کی تیاری', d:'ہل چلائیں، روٹا ویٹر سے زمین نرم کریں۔ کم از کم 2 بار ہل ضروری ہے۔'},
-      {t:'بیج بھگونا', d:'گندم کا بیج 10-12 گھنٹے پانی میں بھگوئیں پھر سائے میں سکھائیں۔'},
-      {t:'بیج بونا', d:'لائن میں بونا بہتر ہے۔ فی ایکڑ 50-60 کلو بیج استعمال کریں۔'},
-      {t:'پہلی کھاد', d:'ڈی اے پی بوائی کے وقت اور یوریا پہلے پانی کے بعد دیں۔'},
-      {t:'آبپاشی', d:'پہلا پانی 3-4 ہفتے بعد، پھر ہر 21-25 دن بعد پانی دیں۔'},
-      {t:'سپرے', d:'جڑی بوٹی مار دوا اور کیڑے مار دوا ضرورت کے مطابق لگائیں۔'},
-      {t:'کٹائی', d:'گندم پیلی ہونے پر کٹوائیں، تھریشر سے گہائی کریں۔'},
-    ]
-  },
-  rice: {
-    name: 'چاول', emoji: '🍚', season: 'خریف (جون-نومبر)',
-    yieldMin: 30, yieldMax: 40, defaultPrice: 5000,
-    costs: {
-      'نرسری اور پنیری': 3000,
-      'زمین کی تیاری': 4000,
-      'لبائی (روپائی)': 6000,
-      'کھاد (DAP + یوریا)': 7000,
-      'پانی / آبپاشی': 5000,
-      'زرعی زہر': 2500,
-      'کٹائی اور گہائی': 5000,
-    },
-    steps: [
-      {t:'نرسری تیار کریں', d:'مئی میں نرسری لگائیں۔ فی ایکڑ 3 کلو بیج کی نرسری کافی ہے۔'},
-      {t:'کھیت تیار کریں', d:'کھیت میں پانی بھریں، ہل چلائیں اور زمین ہموار کریں۔'},
-      {t:'پنیری لگائیں', d:'30-35 دن کی پنیری کو قطاروں میں لگائیں، فاصلہ 20x20 سینٹی میٹر۔'},
-      {t:'کھاد اور پانی', d:'فصل کے مطابق کھاد دیں۔ کھیت میں ہر وقت پانی رکھیں۔'},
-      {t:'سپرے', d:'چاول کی پتی کا جھلساؤ اور کیڑوں سے بچاؤ کے لیے سپرے کریں۔'},
-      {t:'کٹائی', d:'دانہ پک جائے تو کٹائی کریں، کمبائن یا دستی طریقے سے۔'},
-    ]
-  },
-  cotton: {
-    name: 'کپاس', emoji: '🌿', season: 'خریف (اپریل-نومبر)',
-    yieldMin: 25, yieldMax: 35, defaultPrice: 8000,
-    costs: {
-      'زمین کی تیاری': 4000,
-      'بیج (بی ٹی کاٹن)': 5000,
-      'کھاد': 8000,
-      'آبپاشی': 4000,
-      'کیڑے مار سپرے': 8000,
-      'چنائی': 10000,
-      'متفرق': 2000,
-    },
-    steps: [
-      {t:'بیج کا انتخاب', d:'مستند بی ٹی کاٹن بیج خریدیں۔ مارچ میں تیاری شروع کریں۔'},
-      {t:'زمین کی تیاری', d:'گہرا ہل چلائیں، ریج بنائیں۔ زمین میں نمی ہو تو بوائی بہتر ہوگی۔'},
-      {t:'بوائی', d:'اپریل میں ریج پر بیج لگائیں۔ فی ایکڑ 3-4 کلو بیج کافی ہے۔'},
-      {t:'کھاد اور آبپاشی', d:'پہلا پانی 15 دن بعد، پھر 12-15 دن کے وقفے سے پانی دیں۔'},
-      {t:'سپرے', d:'امریکی سنڈی، سفید مکھی اور تیلے سے بچاؤ بہت ضروری ہے۔'},
-      {t:'چنائی', d:'کپاس کھلتے ہی چنیں، 3-4 چنائیاں ہوتی ہیں۔'},
-    ]
-  },
-  maize: {
-    name: 'مکئی', emoji: '🌽', season: 'خریف (مارچ-اگست)',
-    yieldMin: 60, yieldMax: 80, defaultPrice: 1800,
-    costs: {
-      'بیج (ہائبرڈ)': 4000,
-      'زمین کی تیاری': 3000,
-      'کھاد': 7000,
-      'آبپاشی': 3500,
-      'زرعی زہر': 2000,
-      'کٹائی': 3500,
-    },
-    steps: [
-      {t:'بیج بونا', d:'مارچ-اپریل میں بوائی کریں۔ ہائبرڈ بیج بہتر پیداوار دیتا ہے۔'},
-      {t:'کھاد کا استعمال', d:'یوریا تین قسطوں میں دیں، ڈی اے پی بوائی کے وقت۔'},
-      {t:'آبپاشی', d:'ہر 10-12 دن بعد پانی دیں، پھول آنے پر زیادہ پانی ضروری ہے۔'},
-      {t:'سپرے', d:'فوجی سنڈی اور دیگر کیڑوں سے بچاؤ کریں۔'},
-      {t:'کٹائی', d:'90-100 دن میں فصل تیار ہوتی ہے، خشک ہونے پر کٹائی کریں۔'},
-    ]
-  },
-  sugarcane: {
-    name: 'گنا', emoji: '🎋', season: 'سالانہ (فروری-دسمبر)',
-    yieldMin: 400, yieldMax: 500, defaultPrice: 300,
-    costs: {
-      'بیج گنا (قلمیں)': 8000,
-      'زمین کی تیاری': 5000,
-      'کھاد': 12000,
-      'آبپاشی': 8000,
-      'زرعی زہر': 3000,
-      'کٹائی اور گوڈائی': 10000,
-    },
-    steps: [
-      {t:'قلمیں تیار کریں', d:'صحت مند گنے کی آنکھ والی قلمیں کاٹیں۔'},
-      {t:'زمین کی تیاری', d:'گہرا ہل اور نالیاں بنائیں۔'},
-      {t:'بوائی', d:'فروری-مارچ میں قلمیں نالیوں میں رکھیں۔'},
-      {t:'کھاد اور پانی', d:'پہلا یوریا 45 دن بعد، پانی ہر 15 دن بعد۔'},
-      {t:'گوڈائی', d:'مٹی چڑھانا ضروری ہے تاکہ پودا مضبوط ہو۔'},
-      {t:'کٹائی', d:'10-12 ماہ بعد پک جائے، ملوں میں بھیجیں۔'},
-    ]
-  },
-  mustard: {
-    name: 'سرسوں', emoji: '🌼', season: 'ربیع (اکتوبر-فروری)',
-    yieldMin: 8, yieldMax: 12, defaultPrice: 8000,
-    costs: {
-      'بیج': 1500,
-      'زمین کی تیاری': 3000,
-      'کھاد': 4000,
-      'آبپاشی': 2500,
-      'زرعی زہر': 1000,
-      'کٹائی': 3000,
-    },
-    steps: [
-      {t:'بوائی', d:'اکتوبر میں چھٹہ کے ذریعے بوائی کریں۔'},
-      {t:'پتلا کرنا', d:'اگنے کے بعد پودوں میں فاصلہ رکھیں۔'},
-      {t:'کھاد', d:'ڈی اے پی بوائی کے وقت اور یوریا پانی کے بعد۔'},
-      {t:'پانی', d:'ایک یا دو آبپاشی کافی ہے۔'},
-      {t:'کٹائی', d:'پھلیاں پک کر بھوری ہوں تو کاٹیں۔'},
-    ]
-  }
+  wheat:     { name:'گندم',    emoji:'🌾', season:'ربیع (اکتوبر–مارچ)',   yMin:35, yMax:40, price:4000, bagKg:102,
+    costs:{'زمین کی تیاری':3500,'بیج':2500,'کھاد (DAP+یوریا)':6000,'آبپاشی':3000,'زرعی زہر':1500,'مزدوری/کٹائی':4000,'گہائی':2000},
+    steps:[{t:'زمین کی تیاری',d:'ہل چلائیں، روٹا ویٹر سے زمین نرم کریں۔'},{t:'بیج بھگونا',d:'بیج 10-12 گھنٹے پانی میں بھگوئیں۔'},{t:'بیج بونا',d:'فی ایکڑ 50-60 کلو بیج، لائن میں بوائی۔'},{t:'کھاد',d:'DAP بوائی کے وقت، یوریا پہلے پانی کے بعد۔'},{t:'آبپاشی',d:'پہلا پانی 3-4 ہفتے بعد، پھر 21-25 دن کے وقفے سے۔'},{t:'سپرے',d:'جڑی بوٹی مار اور کیڑے مار دوا ضرورت کے مطابق۔'},{t:'کٹائی',d:'گندم پیلی ہو تو کٹائی کریں، تھریشر سے گہائی۔'}]},
+  rice:      { name:'چاول',    emoji:'🍚', season:'خریف (جون–نومبر)',      yMin:30, yMax:40, price:5000, bagKg:80,
+    costs:{'نرسری/پنیری':3000,'زمین تیاری':4000,'روپائی':6000,'کھاد':7000,'آبپاشی':5000,'زرعی زہر':2500,'کٹائی':5000},
+    steps:[{t:'نرسری',d:'مئی میں نرسری لگائیں، فی ایکڑ 3 کلو بیج۔'},{t:'کھیت تیار',d:'پانی بھریں، ہل چلائیں، ہموار کریں۔'},{t:'پنیری',d:'30-35 دن کی پنیری 20×20 سینٹی میٹر فاصلے پر۔'},{t:'کھاد+پانی',d:'ہر وقت کھیت میں پانی رکھیں۔'},{t:'کٹائی',d:'دانہ پکنے پر کمبائن یا دستی کٹائی۔'}]},
+  cotton:    { name:'کپاس',    emoji:'🌿', season:'خریف (اپریل–نومبر)',    yMin:25, yMax:35, price:8000, bagKg:70,
+    costs:{'زمین تیاری':4000,'بیج (BT)':5000,'کھاد':8000,'آبپاشی':4000,'سپرے':8000,'چنائی':10000,'متفرق':2000},
+    steps:[{t:'بیج',d:'مستند BT کاٹن بیج، مارچ میں تیاری۔'},{t:'بوائی',d:'اپریل میں ریج پر 3-4 کلو/ایکڑ بیج۔'},{t:'آبپاشی',d:'15 دن بعد پہلا پانی، پھر 12-15 دن کا وقفہ۔'},{t:'سپرے',d:'سنڈی، سفید مکھی، تیلے سے تحفظ ضروری۔'},{t:'چنائی',d:'کھلتے ہی چنیں، 3-4 چنائیاں ہوتی ہیں۔'}]},
+  maize:     { name:'مکئی',    emoji:'🌽', season:'خریف (مارچ–اگست)',      yMin:60, yMax:80, price:1800, bagKg:50,
+    costs:{'بیج (ہائبرڈ)':4000,'زمین تیاری':3000,'کھاد':7000,'آبپاشی':3500,'سپرے':2000,'کٹائی':3500},
+    steps:[{t:'بوائی',d:'مارچ-اپریل میں ہائبرڈ بیج۔'},{t:'کھاد',d:'یوریا تین مراحل میں، DAP بوائی کے وقت۔'},{t:'آبپاشی',d:'ہر 10-12 دن بعد پانی۔'},{t:'کٹائی',d:'90-100 دن میں تیار، خشک ہونے پر کاٹیں۔'}]},
+  sugarcane: { name:'گنا',     emoji:'🎋', season:'سالانہ (فروری–دسمبر)',   yMin:400,yMax:500,price:300,  bagKg:50,
+    costs:{'قلمیں':8000,'زمین تیاری':5000,'کھاد':12000,'آبپاشی':8000,'سپرے':3000,'کٹائی':10000},
+    steps:[{t:'قلمیں',d:'صحت مند گنے کی آنکھ والی قلمیں کاٹیں۔'},{t:'بوائی',d:'فروری-مارچ میں نالیوں میں قلمیں۔'},{t:'کھاد+پانی',d:'یوریا 45 دن بعد، پانی ہر 15 دن۔'},{t:'کٹائی',d:'10-12 ماہ بعد ملوں میں بھیجیں۔'}]},
+  mustard:   { name:'سرسوں',   emoji:'🌼', season:'ربیع (اکتوبر–فروری)',    yMin:8,  yMax:12, price:8000, bagKg:40,
+    costs:{'بیج':1500,'زمین تیاری':3000,'کھاد':4000,'آبپاشی':2500,'سپرے':1000,'کٹائی':3000},
+    steps:[{t:'بوائی',d:'اکتوبر میں چھٹہ سے بوائی۔'},{t:'پتلا کرنا',d:'اگنے کے بعد پودوں میں فاصلہ۔'},{t:'کھاد+پانی',d:'DAP بوائی کے وقت، یوریا بعد میں۔'},{t:'کٹائی',d:'پھلیاں بھوری ہوں تو کاٹیں۔'}]},
 };
 
-const TIPS = [
-  'گندم کے لیے بہترین وقت اکتوبر سے نومبر ہے۔ بیج بونے سے پہلے زمین کو اچھی طرح ہل کریں۔',
-  'کھاد ڈالنے سے پہلے مٹی کا ٹیسٹ کروائیں۔ صحیح کھاد سے پیداوار 30% تک بڑھ سکتی ہے۔',
-  'پانی کا صحیح وقت جاننا ضروری ہے۔ صبح یا شام آبپاشی کریں، دھوپ میں پانی نہ دیں۔',
-  'کیڑوں کی علامات جلد پہچانیں۔ پتوں پر دھبے یا سوراخ نظر آئیں تو زرعی ماہر سے ملیں۔',
-  'فصل کاٹنے کا صحیح وقت بہت اہم ہے۔ جلدی یا دیر سے کاٹنے سے پیداوار کم ہوتی ہے۔',
-];
+const TIPS=['گندم کے لیے بہترین وقت اکتوبر–نومبر ہے۔ بیج بھگو کر بوئیں۔','کھاد سے پہلے مٹی ٹیسٹ کروائیں — پیداوار 30% بڑھ سکتی ہے۔','صبح یا شام آبپاشی کریں، دھوپ میں پانی نہ دیں۔','پتوں پر دھبے نظر آئیں تو فوراً زرعی ماہر سے ملیں۔','فصل کاٹنے کا صحیح وقت پیداوار پر بہت اثر ڈالتا ہے۔'];
 
-// ══════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════
-let currentCrop = 'wheat';
-// customExpenses: array of {id, name, amount} — editable rows
-let customExpenses = [];
+// ─── STATE ────────────────────────────────────────
+let crop = 'wheat';
+let expenses = [];   // [{id,name,amount}]
+let mannEdited = false;  // user manually overrode mann
 
-// ── localStorage helpers ──────────────────────────
-function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)||'null'); } catch(e){ return null; } }
-function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){} }
+// ─── HELPERS ──────────────────────────────────────
+const $ = id => document.getElementById(id);
+const N = id => parseFloat($(id).value) || 0;
+const fmt = n => Math.abs(n) >= 1000 ? (n/1000).toFixed(1)+'K' : String(Math.round(n));
+const fmtFull = n => n.toLocaleString('en-PK');
 
-// ══════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  const d = new Date();
-  document.getElementById('headerDate').textContent =
-    d.toLocaleDateString('ur-PK', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
-  document.getElementById('dailyTip').textContent = TIPS[d.getDate() % TIPS.length];
-  // Init custom expenses from crop defaults
-  initCustomExpenses();
+// ─── NAVIGATION ───────────────────────────────────
+const PAGES = ['dash','calc','notes','history','calculator'];
+function showPage(id, tabEl){
+  PAGES.forEach(p=>document.getElementById('page-'+p).classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+  else {
+    const tabs=document.querySelectorAll('.nav-tab');
+    tabs[PAGES.indexOf(id)]?.classList.add('active');
+  }
+}
+function bnActive(btn){
+  document.querySelectorAll('.bn-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─── INIT ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const d=new Date();
+  $('headerDate').textContent=d.toLocaleDateString('ur-PK',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  $('dailyTip').textContent=TIPS[d.getDate()%TIPS.length];
+  initExpenses();
   renderSteps();
   renderNotes();
   renderHistory();
-  autoCalculate();
+  live();
 });
 
-// ══════════════════════════════════════════════════
-// TAB SWITCHING
-// ══════════════════════════════════════════════════
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  const el = document.getElementById('tab-' + id);
-  if (el) el.classList.add('active');
-  const tabs = ['dashboard','calculator','notebook','history','calc-simple'];
-  const idx = tabs.indexOf(id);
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  if (tabBtns[idx]) tabBtns[idx].classList.add('active');
-}
-function setNav(btn) {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-function setNavByIndex(i) {
-  const btns = document.querySelectorAll('.nav-btn');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (btns[i]) btns[i].classList.add('active');
-}
-
-// ══════════════════════════════════════════════════
-// LANGUAGE TOGGLE
-// ══════════════════════════════════════════════════
-function setLang(l) {
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-}
-
-// ══════════════════════════════════════════════════
-// CROP SELECTION
-// ══════════════════════════════════════════════════
-function selectCrop(crop, el) {
-  currentCrop = crop;
-  document.querySelectorAll('.crop-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  const c = CROPS[crop];
-  document.getElementById('cropInfoBanner').innerHTML =
-    `${c.emoji} ${c.name} — فی ایکڑ پیداوار: ${c.yieldMin}-${c.yieldMax} من | موسم: ${c.season}`;
-  document.getElementById('priceLabel').textContent = `${c.name} کی قیمت فی من (روپے)`;
-  document.getElementById('priceInput').value = c.defaultPrice;
-  // Update bag weight hint default
-  const bagDefaults = {wheat:40,rice:50,cotton:70,maize:50,sugarcane:50,mustard:40};
-  document.getElementById('bagWeight').value = bagDefaults[crop] || 40;
-  document.getElementById('resultsCard').style.display = 'none';
-  initCustomExpenses();
+// ─── CROP SELECTION ───────────────────────────────
+function setCrop(key, el){
+  crop=key;
+  document.querySelectorAll('.crop-tile').forEach(t=>t.classList.remove('sel'));
+  el.classList.add('sel');
+  const c=CROPS[key];
+  $('cropBanner').innerHTML=`${c.emoji} ${c.name} | موسم: ${c.season} | پیداوار: ${c.yMin}–${c.yMax} من/ایکڑ`;
+  $('priceLbl').textContent=`${c.name} قیمت فی من (₨)`;
+  $('inPrice').value=c.price;
+  $('inBagKg').value=c.bagKg;
+  $('yieldMin').value=c.yMin;
+  $('yieldMax').value=c.yMax;
+  $('inMann').value='';
+  mannEdited=false;
+  initExpenses();
   renderSteps();
-  autoCalculate();
+  live();
 }
 
-function setShare(z) {
-  const s = document.getElementById('shareSlider');
-  if (s) { s.value = z; }
+// ─── LIVE CALCULATION (the core engine) ───────────
+function onMannEdit(){
+  mannEdited=$('inMann').value!=='';
+  live();
 }
 
-function updateRatio(v) {
-  // UI elements removed — keep hidden input in sync only
-  const s = document.getElementById('shareSlider');
-  if (s) s.value = v;
+function live(){
+  const c=CROPS[crop];
+  const acres=N('inAcres')||0;
+  const yMin=N('yieldMin')||c.yMin;
+  const yMax=N('yieldMax')||c.yMax;
+  const avgYield=(yMin+yMax)/2;
+
+  // Mann: use user override or auto
+  let mann;
+  if(mannEdited && N('inMann')>0){
+    mann=N('inMann');
+  } else {
+    mann=parseFloat((avgYield*acres).toFixed(1));
+    if(!mannEdited) $('inMann').placeholder=mann>0?String(mann):'خودکار';
+  }
+
+  const price=N('inPrice');
+  const bagKg=N('inBagKg')||102;
+  const totalKg=mann*40;
+  const bags=totalKg>0?Math.floor(totalKg/bagKg):0;
+  const rem=totalKg%bagKg;
+  const pricePerBag=price>0?Math.round((bagKg/40)*price):0;
+  const revenue=mann*price;
+  const totalExp=expenses.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const profit=revenue-totalExp;
+
+  // Update fields
+  $('yieldRange').textContent=`${yMin}–${yMax} من × ${acres} ایکڑ`;
+  $('res-mann').textContent=mann>0?mann:'—';
+  $('res-revenue').textContent=revenue>0?'₨'+fmtFull(Math.round(revenue)):'—';
+  $('res-totalkg').textContent=totalKg>0?fmtFull(totalKg):'—';
+  $('res-bags').textContent=bags>0?bags:'—';
+  $('res-perbag').textContent=pricePerBag>0?'₨'+fmt(pricePerBag):'—';
+  $('bagFormula').textContent=totalKg>0
+    ?`${mann} من × 40 = ${fmtFull(totalKg)} کلو ÷ ${bagKg} = ${bags} بوریاں${rem>0?' + '+rem.toFixed(0)+' کلو باقی':''}`
+    :'ایکڑ اور قیمت درج کریں';
+
+  // Expenses total
+  $('res-totalexp').textContent='₨'+fmtFull(Math.round(totalExp));
+
+  // Summary
+  $('sum-mann').textContent=mann>0?mann+'  من':'—';
+  $('sum-rev').textContent=revenue>0?'₨'+fmt(revenue):'—';
+  $('sum-bags').textContent=bags>0?bags+' 🎒':'—';
+  $('sum-exp').textContent='₨'+fmt(totalExp);
+  const pb=$('profitBanner');
+  if(revenue>0){
+    $('sum-profit').textContent=(profit>=0?'₨':'-₨')+fmtFull(Math.round(Math.abs(profit)));
+    $('profitLabel').textContent=profit>=0?'💰 خالص منافع':'📉 نقصان';
+    pb.className='profit-banner '+(profit>=0?'gain':'loss');
+  } else {
+    $('sum-profit').textContent='—';
+  }
+
+  // Dashboard
+  $('d-acres').textContent=acres||'—';
+  $('d-mann').textContent=mann>0?mann:'—';
+  $('d-profit').textContent=revenue>0?(profit>=0?'+':'-')+'₨'+fmt(Math.abs(profit)):'—';
 }
 
-// ══════════════════════════════════════════════════
-// CUSTOM EXPENSES MANAGER
-// ══════════════════════════════════════════════════
-function initCustomExpenses() {
-  // Load crop defaults as editable rows
-  const c = CROPS[currentCrop];
-  const acres = parseFloat(document.getElementById('acreInput').value) || 2;
-  customExpenses = Object.entries(c.costs).map(([name, perAcre], i) => ({
-    id: i + 1,
-    name,
-    perAcre,
-    amount: Math.round(perAcre * acres)
-  }));
-  renderCustomExpenses();
+// ─── EXPENSES ─────────────────────────────────────
+function initExpenses(){
+  const c=CROPS[crop];
+  const acres=N('inAcres')||2;
+  expenses=Object.entries(c.costs).map(([name,pa],i)=>({id:i+1,name,amount:Math.round(pa*acres)}));
+  renderExpenses();
 }
 
-function renderCustomExpenses() {
-  const acres = parseFloat(document.getElementById('acreInput').value) || 1;
-  const el = document.getElementById('customExpensesList');
-  if (!el) return;
-  el.innerHTML = customExpenses.map(exp => `
-    <div class="custom-exp-row" id="exprow-${exp.id}">
-      <input type="text" value="${exp.name}" placeholder="خرچے کا نام"
-        onchange="updateExpName(${exp.id},this.value)"
-        style="font-size:0.82rem;padding:8px 10px">
-      <input type="number" value="${exp.amount}" placeholder="رقم"
-        onchange="updateExpAmt(${exp.id},this.value);autoCalculate()"
-        oninput="updateExpAmt(${exp.id},this.value);autoCalculate()"
-        style="font-size:0.88rem;padding:8px 10px">
-      <button class="del-exp-btn" onclick="deleteExp(${exp.id})">🗑</button>
+function renderExpenses(){
+  const el=$('expList');
+  el.innerHTML=expenses.map(e=>`
+    <div class="exp-row" id="er-${e.id}">
+      <input type="text" class="f-input" value="${e.name}" placeholder="خرچے کا نام"
+        onchange="updExpName(${e.id},this.value)"
+        style="font-size:0.8rem;padding:9px 10px">
+      <input type="number" class="f-input num" value="${e.amount}" placeholder="رقم"
+        oninput="updExpAmt(${e.id},this.value)"
+        style="font-size:0.88rem;padding:9px 10px">
+      <button class="del-btn" onclick="delExp(${e.id})">🗑</button>
     </div>
   `).join('');
+  live();
 }
 
-function updateExpName(id, val) {
-  const exp = customExpenses.find(e => e.id === id);
-  if (exp) exp.name = val;
-}
-function updateExpAmt(id, val) {
-  const exp = customExpenses.find(e => e.id === id);
-  if (exp) exp.amount = parseFloat(val) || 0;
-}
-function deleteExp(id) {
-  customExpenses = customExpenses.filter(e => e.id !== id);
-  renderCustomExpenses();
-  autoCalculate();
-}
-function addCustomExpense() {
-  const newId = Date.now();
-  customExpenses.push({ id: newId, name: 'نیا خرچہ', amount: 0 });
-  renderCustomExpenses();
-  // Focus the new name field
-  setTimeout(() => {
-    const row = document.getElementById('exprow-' + newId);
-    if (row) row.querySelector('input[type="text"]').focus();
-  }, 50);
+function updExpName(id,v){const e=expenses.find(x=>x.id===id);if(e)e.name=v;}
+function updExpAmt(id,v){const e=expenses.find(x=>x.id===id);if(e){e.amount=parseFloat(v)||0;live();}}
+function delExp(id){expenses=expenses.filter(x=>x.id!==id);renderExpenses();}
+function addExp(){
+  const id=Date.now();
+  expenses.push({id,name:'نیا خرچہ',amount:0});
+  renderExpenses();
+  setTimeout(()=>{const r=document.getElementById('er-'+id);if(r)r.querySelector('input[type=text]').focus();},60);
 }
 
-// Re-init expense amounts when acres change
-function onAcresChange() {
-  const acres = parseFloat(document.getElementById('acreInput').value) || 1;
-  // Only update amounts for expenses that still match default per-acre values
-  const c = CROPS[currentCrop];
-  const defaults = Object.entries(c.costs);
-  customExpenses.forEach((exp, i) => {
-    if (i < defaults.length) {
-      exp.amount = Math.round(defaults[i][1] * acres);
-    }
-  });
-  renderCustomExpenses();
-  autoCalculate();
-}
-
-// ══════════════════════════════════════════════════
-// FARMING STEPS
-// ══════════════════════════════════════════════════
-function renderSteps() {
-  const steps = CROPS[currentCrop].steps;
-  const html = steps.map((s, i) => `
+// ─── FARMING STEPS ────────────────────────────────
+function renderSteps(){
+  const steps=CROPS[crop].steps;
+  $('farmSteps').innerHTML=steps.map((s,i)=>`
     <div class="step-item">
       <div class="step-num">${i+1}</div>
-      <div class="step-content">
-        <div class="step-title">${s.t}</div>
-        <div class="step-desc">${s.d}</div>
-      </div>
-    </div>
-  `).join('');
-  document.getElementById('farmingSteps').innerHTML = html;
+      <div><div class="step-title">${s.t}</div><div class="step-desc">${s.d}</div></div>
+    </div>`).join('');
 }
 
-// ══════════════════════════════════════════════════
-// CALCULATIONS
-// ══════════════════════════════════════════════════
-function fmt(n) { return n.toLocaleString('en-PK'); }
-
-function autoCalculate() {
-  const acres = parseFloat(document.getElementById('acreInput').value) || 0;
-  if (acres <= 0) return;
-  calculateAll();
-}
-
-function calculateAll() {
-  const acres = parseFloat(document.getElementById('acreInput').value) || 0;
-  const price = parseFloat(document.getElementById('priceInput').value) || 0;
-  const bagWeightKg = parseFloat(document.getElementById('bagWeight').value) || 40;
-
-  if (acres <= 0) return;
-
-  const c = CROPS[currentCrop];
-  const avgYield = (c.yieldMin + c.yieldMax) / 2;
-  const totalYieldMan = parseFloat((avgYield * acres).toFixed(1));
-  const totalYieldKg = totalYieldMan * 40;
-  const totalBags = Math.floor(totalYieldKg / bagWeightKg);
-  const pricePerBag = Math.round((bagWeightKg / 40) * price);
-  const revenue = totalYieldMan * price;
-  const totalCost = customExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-  const profit = revenue - totalCost;
-
-  // Update main results
-  document.getElementById('res-yield').textContent = totalYieldMan;
-  document.getElementById('res-cost').textContent = '₨' + fmt(Math.round(totalCost));
-  document.getElementById('res-revenue').textContent = '₨' + fmt(Math.round(revenue));
-
-  const plBox = document.getElementById('profitLossBox');
-  const plLabel = document.getElementById('profitLossLabel');
-  const plSub = document.getElementById('profitLossSub');
-  if (profit >= 0) {
-    plBox.className = 'result-box profit-box';
-    plLabel.textContent = 'منافع';
-    document.getElementById('res-profit').style.color = 'var(--sky)';
-    plSub.style.color = 'var(--sky)';
-  } else {
-    plBox.className = 'result-box loss-box';
-    plLabel.textContent = 'نقصان';
-    document.getElementById('res-profit').style.color = 'var(--red)';
-    plSub.style.color = 'var(--red)';
-  }
-  document.getElementById('res-profit').textContent = (profit >= 0 ? '₨' : '−₨') + fmt(Math.round(Math.abs(profit)));
-
-  // Bags section
-  document.getElementById('res-bags').textContent = totalBags;
-  document.getElementById('res-bagwt').textContent = bagWeightKg + ' کلو';
-  document.getElementById('res-bagprice').textContent = '₨' + fmt(pricePerBag);
-  document.getElementById('res-bagsummary').innerHTML =
-    `${totalYieldMan} من × 40 کلو = ${totalYieldKg} کلو<br>` +
-    `${totalYieldKg} کلو ÷ ${bagWeightKg} کلو = <strong>${totalBags} بوریاں</strong> | ہر بوری: ₨${fmt(pricePerBag)}`;
-
-  document.getElementById('resultsCard').style.display = 'block';
-
-  // Update dashboard
-  document.getElementById('dash-acres').textContent = acres;
-  document.getElementById('dash-crop').textContent = CROPS[currentCrop].emoji;
-  const dashProfit = document.getElementById('dash-profit');
-  dashProfit.textContent = (profit >= 0 ? '+' : '') + fmt(Math.round(profit/1000)) + 'K';
-  dashProfit.style.color = profit >= 0 ? '#a8e6be' : '#ffb3b3';
-
-  // Also refresh quick bags calc if it has a value
-  quickBagsCalc();
-}
-
-// ══════════════════════════════════════════════════
-// QUICK MAN → BAGS CALCULATOR
-// Independent tool: enter any man count → get bags + price
-// ══════════════════════════════════════════════════
-function quickBagsCalc() {
-  const manInput = document.getElementById('quickMan');
-  const rateInput = document.getElementById('quickRate');
-  if (!manInput) return;
-
-  const man = parseFloat(manInput.value) || 0;
-  // Use quickRate if filled, otherwise fall back to priceInput
-  const priceEl = document.getElementById('priceInput');
-  const rate = parseFloat(rateInput.value) || parseFloat(priceEl ? priceEl.value : 0) || 0;
-  const bagKg = parseFloat(document.getElementById('bagWeight').value) || 40;
-
-  // Auto-fill quickRate placeholder from price input
-  if (priceEl && !rateInput.value) {
-    rateInput.placeholder = priceEl.value ? `خودکار: ${priceEl.value}` : 'ریٹ درج کریں';
-  }
-
-  const resultEl = document.getElementById('quickBagsResult');
-  if (!resultEl) return;
-
-  if (man <= 0) { resultEl.style.display = 'none'; return; }
-
-  const totalKg = man * 40; // 1 man (Pakistani) = 40 kg
-  const bags = Math.floor(totalKg / bagKg);
-  const remainKg = totalKg % bagKg;
-  const pricePerBag = rate > 0 ? Math.round((bagKg / 40) * rate) : 0;
-  const totalValue = rate > 0 ? Math.round(man * rate) : 0;
-
-  document.getElementById('qr-bags').textContent = bags + (remainKg > 0 ? ` + ${remainKg}کلو` : '');
-  document.getElementById('qr-perbag').textContent = rate > 0 ? '₨' + fmt(pricePerBag) : '—';
-  document.getElementById('qr-total').textContent = rate > 0 ? '₨' + fmt(totalValue) : '—';
-  document.getElementById('qr-formula').innerHTML =
-    `${man} من × 40 = ${totalKg} کلو &nbsp;÷&nbsp; ${bagKg} کلو = <strong>${bags} بوریاں</strong>` +
-    (remainKg > 0 ? ` + ${remainKg} کلو بچا` : '') +
-    (rate > 0 ? `<br>کل قیمت: ${man} من × ₨${fmt(rate)} = ₨${fmt(totalValue)}` : '');
-
-  resultEl.style.display = 'block';
-}
-
-// ══════════════════════════════════════════════════
-// SAVE / LOAD RECORDS
-// ══════════════════════════════════════════════════
-function saveRecord() {
-  const acres = document.getElementById('acreInput').value;
-  const price = document.getElementById('priceInput').value;
-  const bagWeightKg = parseFloat(document.getElementById('bagWeight').value) || 40;
-  const zShare = document.getElementById('shareSlider').value;
-  const c = CROPS[currentCrop];
-  const avgYield = ((c.yieldMin + c.yieldMax) / 2) * acres;
-  const revenue = avgYield * price;
-  const totalCost = customExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-  const profit = revenue - totalCost;
-  const totalYieldKg = avgYield * 40;
-  const totalBags = Math.floor(totalYieldKg / bagWeightKg);
-
-  const records = getStorage('kp_records') || [];
-  records.unshift({
-    id: Date.now(),
-    date: new Date().toLocaleDateString('ur-PK',{day:'numeric',month:'short',year:'numeric'}),
-    crop: currentCrop,
-    cropName: c.name,
-    cropEmoji: c.emoji,
-    acres, price,
-    yield: avgYield.toFixed(1),
-    bags: totalBags,
-    bagWeightKg,
-    cost: Math.round(totalCost),
-    revenue: Math.round(revenue),
-    profit: Math.round(profit),
-    zShare,
-    expenses: JSON.parse(JSON.stringify(customExpenses))
-  });
-  setStorage('kp_records', records);
+// ─── SAVE RECORD ──────────────────────────────────
+function saveRec(){
+  const c=CROPS[crop];
+  const acres=N('inAcres');
+  const mann=mannEdited&&N('inMann')>0?N('inMann'):parseFloat(((N('yieldMin')+N('yieldMax'))/2*acres).toFixed(1));
+  const price=N('inPrice');
+  const bagKg=N('inBagKg')||102;
+  const revenue=mann*price;
+  const totalExp=expenses.reduce((s,e)=>s+(parseFloat(e.amount)||0),0);
+  const bags=Math.floor(mann*40/bagKg);
+  const profit=Math.round(revenue-totalExp);
+  const recs=LS.get('zh_recs')||[];
+  recs.unshift({id:Date.now(),date:new Date().toLocaleDateString('ur-PK',{day:'numeric',month:'short',year:'numeric'}),crop,cropName:c.name,cropEmoji:c.emoji,acres,mann:mann.toFixed(1),bags,price,revenue:Math.round(revenue),totalExp:Math.round(totalExp),profit,expenses:JSON.parse(JSON.stringify(expenses))});
+  LS.set('zh_recs',recs);
   renderHistory();
   alert('✅ ریکارڈ محفوظ ہو گیا!');
 }
 
-function renderHistory() {
-  const records = getStorage('kp_records') || [];
-  const el = document.getElementById('historyList');
-  if (!records.length) {
-    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--gray-3)"><div style="font-size:3rem">📊</div><div style="margin-top:8px">ابھی کوئی ریکارڈ نہیں<br>پہلے حساب لگائیں اور محفوظ کریں</div></div>`;
-    return;
-  }
-  el.innerHTML = records.map(r => `
-    <div class="history-item">
-      <div class="h-date">${r.date}</div>
-      <div class="h-crop">${r.cropEmoji} ${r.cropName} — ${r.acres} ایکڑ</div>
-      <div class="h-stats">
-        <div class="h-stat">پیداوار: <span>${r.yield} من</span></div>
-        ${r.bags ? `<div class="h-stat">بوریاں: <span>🎒 ${r.bags}</span></div>` : ''}
-        <div class="h-stat">اخراجات: <span>₨${fmt(r.cost)}</span></div>
-        <div class="h-stat" style="color:${r.profit>=0?'var(--green-mid)':'var(--red)'}">
-          ${r.profit>=0?'منافع':'نقصان'}: <span>₨${fmt(Math.abs(r.profit))}</span>
-        </div>
+function renderHistory(){
+  const recs=LS.get('zh_recs')||[];
+  const el=$('histList');
+  if(!recs.length){el.innerHTML=`<div class="empty-state"><div class="es-icon">📊</div><p>ابھی کوئی ریکارڈ نہیں<br>حساب لگائیں اور محفوظ کریں</p></div>`;return;}
+  el.innerHTML=recs.map(r=>`
+    <div class="hist-card">
+      <div class="hc-date">${r.date}</div>
+      <div class="hc-crop">${r.cropEmoji} ${r.cropName} — ${r.acres} ایکڑ</div>
+      <div class="hc-stats">
+        <div class="hcs">من: <span>${r.mann}</span></div>
+        <div class="hcs">بوریاں: <span>🎒${r.bags}</span></div>
+        <div class="hcs">اخراجات: <span>₨${fmtFull(r.totalExp)}</span></div>
+        <div class="hcs" style="color:${r.profit>=0?'var(--g1)':'var(--red)'}">${r.profit>=0?'منافع':'نقصان'}: <span>₨${fmtFull(Math.abs(r.profit))}</span></div>
       </div>
-      <div style="margin-top:8px;display:flex;gap:6px">
-        <button class="btn btn-outline btn-sm" onclick="loadRecord(${r.id})">دیکھیں</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteRecord(${r.id})">حذف</button>
+      <div class="hc-actions">
+        <button class="btn btn-outline btn-sm" onclick="loadRec(${r.id})">دوبارہ دیکھیں</button>
+        <button class="btn btn-danger btn-sm" onclick="delRec(${r.id})">حذف</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
-function loadRecord(id) {
-  const records = getStorage('kp_records') || [];
-  const r = records.find(x => x.id === id);
-  if (!r) return;
-  document.getElementById('acreInput').value = r.acres;
-  document.getElementById('priceInput').value = r.price;
-  if (r.bagWeightKg) document.getElementById('bagWeight').value = r.bagWeightKg;
-  document.getElementById('shareSlider').value = r.zShare;
-  updateRatio(r.zShare);
-  currentCrop = r.crop;
-  document.querySelectorAll('.crop-card').forEach((c,i) => {
-    const crops = ['wheat','rice','cotton','maize','sugarcane','mustard'];
-    c.classList.toggle('selected', crops[i] === r.crop);
-  });
-  const c = CROPS[r.crop];
-  document.getElementById('cropInfoBanner').innerHTML = `${c.emoji} ${c.name} — فی ایکڑ پیداوار: ${c.yieldMin}-${c.yieldMax} من`;
-  // Restore saved expenses if available
-  if (r.expenses && r.expenses.length) {
-    customExpenses = JSON.parse(JSON.stringify(r.expenses));
-  } else {
-    initCustomExpenses();
-  }
-  renderCustomExpenses();
+function loadRec(id){
+  const recs=LS.get('zh_recs')||[];
+  const r=recs.find(x=>x.id===id);
+  if(!r)return;
+  const tiles=document.querySelectorAll('.crop-tile');
+  const keys=['wheat','rice','cotton','maize','sugarcane','mustard'];
+  tiles.forEach((t,i)=>t.classList.toggle('sel',keys[i]===r.crop));
+  crop=r.crop;
+  const c=CROPS[r.crop];
+  $('cropBanner').innerHTML=`${c.emoji} ${c.name} | ${c.season}`;
+  $('priceLbl').textContent=`${c.name} قیمت فی من (₨)`;
+  $('inAcres').value=r.acres;
+  $('inPrice').value=r.price;
+  $('inBagKg').value=c.bagKg;
+  $('yieldMin').value=c.yMin;
+  $('yieldMax').value=c.yMax;
+  $('inMann').value='';mannEdited=false;
+  if(r.expenses&&r.expenses.length)expenses=JSON.parse(JSON.stringify(r.expenses));
+  else initExpenses();
+  renderExpenses();
   renderSteps();
-  showTab('calculator');
-  setNavByIndex(1);
-  calculateAll();
+  showPage('calc',null);bnActive($('bn-calc'));
+  live();
 }
 
-function deleteRecord(id) {
-  if (!confirm('کیا آپ یہ ریکارڈ حذف کرنا چاہتے ہیں؟')) return;
-  let records = getStorage('kp_records') || [];
-  records = records.filter(x => x.id !== id);
-  setStorage('kp_records', records);
+function delRec(id){
+  if(!confirm('حذف کریں؟'))return;
+  LS.set('zh_recs',(LS.get('zh_recs')||[]).filter(x=>x.id!==id));
   renderHistory();
 }
 
-// ══════════════════════════════════════════════════
-// NOTEBOOK
-// ══════════════════════════════════════════════════
-function saveNote() {
-  const title = document.getElementById('noteTitle').value.trim();
-  const text = document.getElementById('noteText').value.trim();
-  if (!text) { alert('نوٹ لکھیں پھر محفوظ کریں'); return; }
-  const notes = getStorage('kp_notes') || [];
-  notes.unshift({
-    id: Date.now(),
-    title: title || 'نوٹ',
-    text,
-    date: new Date().toLocaleDateString('ur-PK',{weekday:'short',day:'numeric',month:'short',year:'numeric'}) + ' ' +
-          new Date().toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})
-  });
-  setStorage('kp_notes', notes);
-  document.getElementById('noteTitle').value = '';
-  document.getElementById('noteText').value = '';
+// ─── NOTEBOOK ─────────────────────────────────────
+function saveNote(){
+  const title=$('noteTitle').value.trim();
+  const text=$('noteText').value.trim();
+  if(!text){alert('نوٹ لکھیں پھر محفوظ کریں');return;}
+  const notes=LS.get('zh_notes')||[];
+  notes.unshift({id:Date.now(),title:title||'نوٹ',text,
+    date:new Date().toLocaleDateString('ur-PK',{weekday:'short',day:'numeric',month:'short',year:'numeric'})+' '+new Date().toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})});
+  LS.set('zh_notes',notes);
+  $('noteTitle').value='';$('noteText').value='';
   renderNotes();
-  alert('✅ نوٹ محفوظ ہو گیا!');
+  alert('✅ نوٹ محفوظ!');
 }
 
-function deleteNote(id) {
-  let notes = getStorage('kp_notes') || [];
-  notes = notes.filter(x => x.id !== id);
-  setStorage('kp_notes', notes);
+function delNote(id){
+  LS.set('zh_notes',(LS.get('zh_notes')||[]).filter(x=>x.id!==id));
   renderNotes();
 }
 
-function renderNotes() {
-  const notes = getStorage('kp_notes') || [];
-  const el = document.getElementById('notesList');
-  if (!notes.length) {
-    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--gray-3)"><div style="font-size:2.5rem">📝</div><div style="margin-top:8px">ابھی کوئی نوٹ نہیں ہے</div></div>`;
-    return;
-  }
-  el.innerHTML = notes.map(n => `
-    <div class="note-item">
-      <div class="note-date">${n.date}</div>
-      <div style="font-weight:600;margin-bottom:4px">${n.title}</div>
-      <div class="note-text">${n.text}</div>
-      <div class="note-actions">
-        <button class="btn btn-danger btn-sm" onclick="deleteNote(${n.id})">حذف</button>
-      </div>
-    </div>
-  `).join('');
+function renderNotes(){
+  const notes=LS.get('zh_notes')||[];
+  const el=$('notesList');
+  if(!notes.length){el.innerHTML=`<div class="empty-state"><div class="es-icon">📝</div><p>ابھی کوئی نوٹ نہیں</p></div>`;return;}
+  el.innerHTML=notes.map(n=>`
+    <div class="note-card">
+      <div class="nc-date">${n.date}</div>
+      <div class="nc-title">${n.title}</div>
+      <div class="nc-text">${n.text}</div>
+      <div class="nc-actions"><button class="btn btn-danger btn-sm" onclick="delNote(${n.id})">حذف</button></div>
+    </div>`).join('');
 }
 
-// ══════════════════════════════════════════════════
-// SIMPLE CALCULATOR
-// ══════════════════════════════════════════════════
-let cVal = '0', cPrev = null, cOp = null, cNew = true;
+// ─── CALCULATOR ───────────────────────────────────
+let cv='0', cp=null, co=null, cn=true;
 
-function calcNum(n) {
-  if (cNew) { cVal = n === '.' ? '0.' : n; cNew = false; }
-  else {
-    if (n === '.' && cVal.includes('.')) return;
-    cVal = cVal === '0' && n !== '.' ? n : cVal + n;
-  }
-  document.getElementById('calcResult').textContent = cVal;
+function cNum(n){
+  if(cn){cv=n==='.'?'0.':n;cn=false;}
+  else{if(n==='.'&&cv.includes('.'))return;cv=cv==='0'&&n!=='.'?n:cv+n;}
+  $('cResult').textContent=cv;
 }
-function calcOp(op) {
-  if (cPrev !== null && !cNew) calcEquals(true);
-  cPrev = parseFloat(cVal);
-  cOp = op;
-  cNew = true;
-  document.getElementById('calcExpr').textContent = cPrev + ' ' + op;
+function cOp(op){
+  if(cp!==null&&!cn)cEq(true);
+  cp=parseFloat(cv);co=op;cn=true;
+  $('cExpr').textContent=cp+' '+op;
 }
-function calcEquals(internal) {
-  if (cPrev === null || cOp === null) return;
-  const cur = parseFloat(cVal);
-  let res;
-  if (cOp === '+') res = cPrev + cur;
-  else if (cOp === '-') res = cPrev - cur;
-  else if (cOp === '×') res = cPrev * cur;
-  else if (cOp === '÷') res = cur === 0 ? 'غلط' : cPrev / cur;
-  else if (cOp === '%') res = cPrev * cur / 100;
-  document.getElementById('calcExpr').textContent = cPrev + ' ' + cOp + ' ' + cur + ' =';
-  cVal = typeof res === 'number' ? parseFloat(res.toFixed(8)).toString() : res;
-  document.getElementById('calcResult').textContent = cVal;
-  if (!internal) { cPrev = null; cOp = null; }
-  cNew = true;
+function cEq(int){
+  if(cp===null||co===null)return;
+  const cur=parseFloat(cv);
+  let r;
+  if(co==='+')r=cp+cur;else if(co==='-')r=cp-cur;
+  else if(co==='×')r=cp*cur;else if(co==='÷')r=cur===0?NaN:cp/cur;
+  else if(co==='%')r=cp*cur/100;
+  $('cExpr').textContent=cp+' '+co+' '+cur+' =';
+  cv=isNaN(r)?'غلط':parseFloat(r.toFixed(10)).toString();
+  $('cResult').textContent=cv;
+  if(!int){cp=null;co=null;}
+  cn=true;
 }
-function calcClear() {
-  cVal = '0'; cPrev = null; cOp = null; cNew = true;
-  document.getElementById('calcResult').textContent = '0';
-  document.getElementById('calcExpr').textContent = '';
-}
-function calcBack() {
-  if (cNew || cVal.length <= 1) { cVal = '0'; document.getElementById('calcResult').textContent = '0'; return; }
-  cVal = cVal.slice(0,-1);
-  document.getElementById('calcResult').textContent = cVal;
+function cClear(){cv='0';cp=null;co=null;cn=true;$('cResult').textContent='0';$('cExpr').textContent='';}
+function cBack(){
+  if(cn||cv.length<=1){cv='0';$('cResult').textContent='0';return;}
+  cv=cv.slice(0,-1);$('cResult').textContent=cv;
 }
 </script>
 </body>
