@@ -2,9 +2,28 @@
 <html lang="ur" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>کسان پرو - KisanPro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- ═══════════ PWA META TAGS ═══════════ -->
+<title>زمین حساب - Zameen Hisab</title>
+<meta name="application-name" content="Zameen Hisab">
+<meta name="description" content="اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں">
+<meta name="theme-color" content="#1a5c2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="زمین حساب">
+<!-- manifest injected by JS only when hosted on GitHub Pages -->
+
+<!-- Apple touch icon (inline SVG data URI — no external file needed) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231a5c2e'/><text x='50%' y='55%' font-size='100' text-anchor='middle' dominant-baseline='middle'>🌱</text></svg>">
+
+<!-- ═══════════ FONTS ═══════════
+     Loaded from Google Fonts online → service worker caches them.
+     If offline & not yet cached, body falls back gracefully to serif/sans-serif.
+-->
 <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --green-dark: #1a5c2e;
@@ -43,6 +62,24 @@ body {
   position: relative;
   overflow-x: hidden;
 }
+
+/* ─── OFFLINE BANNER ─────────────────────── */
+#offlineBanner {
+  display: none;
+  background: #e65100;
+  color: white;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-family: 'Noto Nastaliq Urdu', serif;
+  position: fixed;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 9999;
+}
+#offlineBanner.show { display: block; }
 
 /* ─── HEADER ─────────────────────────────────── */
 .app-header {
@@ -110,16 +147,25 @@ body {
 
 /* ─── CONTENT ─────────────────────────────── */
 .tab-content { display: none; padding: 16px 16px 100px; }
-.tab-content.active { display: block; }
+.tab-content.active {
+  display: block;
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-/* ─── CARDS ───────────────────────────────── */
+/* ─── DESIGN POLISH ──────────────────────────── */
 .card {
   background: white;
   border-radius: var(--radius);
   padding: 18px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 2px 12px rgba(26,92,46,0.08), 0 1px 3px rgba(0,0,0,0.04);
   margin-bottom: 14px;
+  transition: box-shadow 0.2s;
 }
+.card:hover { box-shadow: 0 6px 24px rgba(26,92,46,0.14); }
 .card-title {
   font-size: 1rem;
   font-weight: 700;
@@ -153,7 +199,11 @@ input[type="number"], input[type="text"], select, textarea {
   transition: border-color 0.2s;
   direction: rtl;
 }
-input:focus, select:focus, textarea:focus { border-color: var(--green-light); background: white; }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--green-light);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(76,175,115,0.15);
+}
 select { cursor: pointer; appearance: none; }
 
 /* ─── BUTTONS ─────────────────────────────── */
@@ -177,17 +227,21 @@ select { cursor: pointer; appearance: none; }
   color: white;
   box-shadow: 0 4px 14px rgba(45,138,78,0.35);
 }
-.btn-primary:active { transform: scale(0.97); }
+.btn-primary:active { transform: scale(0.97); box-shadow: none; }
 .btn-gold {
   background: linear-gradient(135deg, var(--gold), #e8921a);
   color: white;
   box-shadow: 0 4px 14px rgba(245,166,35,0.35);
+  transition: all 0.2s;
 }
+.btn-gold:active { transform: scale(0.97); }
 .btn-outline {
   background: transparent;
   border: 2px solid var(--green-light);
   color: var(--green-mid);
+  transition: all 0.2s;
 }
+.btn-outline:hover { background: var(--green-pale); }
 .btn-sm {
   width: auto;
   padding: 8px 16px;
@@ -322,6 +376,35 @@ input[type="range"]::-webkit-slider-thumb {
 .expense-row:last-child { border-bottom: none; }
 .expense-row .exp-name { color: var(--text-light); }
 .expense-row .exp-val { font-weight: 600; color: var(--text); }
+
+/* ─── CUSTOM EXPENSES ──────────────────────── */
+.custom-exp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  background: var(--gray-1);
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid var(--gray-2);
+}
+.custom-exp-row input {
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  border-radius: 8px;
+}
+.del-exp-btn {
+  width: 34px; height: 34px;
+  border: none;
+  background: #fdecea;
+  color: var(--red);
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 
 /* ─── STEPS ───────────────────────────────── */
 .step-item {
@@ -472,6 +555,7 @@ input[type="range"]::-webkit-slider-thumb {
   display: flex;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
   z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .nav-btn {
   flex: 1;
@@ -488,7 +572,6 @@ input[type="range"]::-webkit-slider-thumb {
 .nav-btn .nav-icon { font-size: 1.4rem; }
 .nav-btn .nav-label { font-size: 0.65rem; color: var(--gray-4); font-family: 'Noto Nastaliq Urdu', serif; }
 .nav-btn.active .nav-label { color: var(--green-mid); font-weight: 700; }
-.nav-btn.active .nav-icon { filter: none; }
 .nav-indicator {
   width: 20px; height: 3px;
   background: var(--green-mid);
@@ -568,9 +651,64 @@ input[type="range"]::-webkit-slider-thumb {
   align-items: center;
   gap: 8px;
 }
+
+/* ─── PWA INSTALL PROMPT ───────────────────── */
+#installPrompt {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 398px;
+  background: var(--green-dark);
+  color: white;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-lg);
+  z-index: 500;
+  align-items: center;
+  gap: 12px;
+}
+#installPrompt.show { display: flex; }
+#installPrompt .install-text { flex: 1; font-size: 0.85rem; }
+#installPrompt .install-text strong { display: block; margin-bottom: 2px; }
+#installBtn {
+  background: var(--gold);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Noto Nastaliq Urdu', serif;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+#dismissInstall {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+}
 </style>
 </head>
 <body>
+
+<!-- OFFLINE BANNER -->
+<div id="offlineBanner">⚡ آپ آف لائن ہیں — ایپ مکمل کام کر رہی ہے</div>
+
+<!-- PWA INSTALL PROMPT -->
+<div id="installPrompt">
+  <div class="install-text">
+    <strong>ہوم اسکرین پر لگائیں</strong>
+    انٹرنیٹ کے بغیر بھی چلے گی
+  </div>
+  <button id="installBtn" onclick="installPWA()">انسٹال</button>
+  <button id="dismissInstall" onclick="document.getElementById('installPrompt').classList.remove('show')">✕</button>
+</div>
 
 <!-- HEADER -->
 <header class="app-header">
@@ -578,8 +716,8 @@ input[type="range"]::-webkit-slider-thumb {
     <div class="app-logo">
       <div class="logo-icon">🌱</div>
       <div class="logo-text">
-        <h1>KisanPro</h1>
-        <span>کسان پرو - ذہین کاشتکاری</span>
+        <h1>Zameen Hisab</h1>
+        <span>زمین حساب — ذہین کاشتکاری</span>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
@@ -633,8 +771,9 @@ input[type="range"]::-webkit-slider-thumb {
 <!-- ══════════════════════════════════════════════ -->
 <section class="tab-content active" id="tab-dashboard">
   <div class="dash-hero">
-    <h2>السلام علیکم، کسان! 👋</h2>
-    <p class="welcome">اپنی کھیتی کا مکمل حساب یہاں ملے گا</p>
+    <!-- ✅ UPDATED GREETING TEXT -->
+    <h2>خوش آمدید! 👋</h2>
+    <p class="welcome">اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں</p>
     <div class="dash-stats">
       <div class="dash-stat">
         <div class="ds-val" id="dash-acres">-</div>
@@ -711,7 +850,6 @@ input[type="range"]::-webkit-slider-thumb {
 <!--  TAB 2: CROP CALCULATOR                        -->
 <!-- ══════════════════════════════════════════════ -->
 <section class="tab-content" id="tab-calculator">
-  <!-- STEP 1: SELECT CROP -->
   <div class="card">
     <div class="card-title"><span class="icon">🌱</span> فصل منتخب کریں</div>
     <div class="crop-grid">
@@ -751,71 +889,78 @@ input[type="range"]::-webkit-slider-thumb {
     </div>
   </div>
 
-  <!-- STEP 2: LAND SIZE -->
   <div class="card">
-    <div class="card-title"><span class="icon">📐</span> زمین کا رقبہ</div>
-    <div class="form-group">
-      <label>کتنے ایکڑ زمین ہے؟</label>
-      <input type="number" id="acreInput" min="0.5" max="500" step="0.5" value="2" placeholder="مثلاً: 2" oninput="autoCalculate()">
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-outline btn-sm" onclick="setAcres(1)">1 ایکڑ</button>
-      <button class="btn btn-outline btn-sm" onclick="setAcres(2)">2 ایکڑ</button>
-      <button class="btn btn-outline btn-sm" onclick="setAcres(5)">5 ایکڑ</button>
-      <button class="btn btn-outline btn-sm" onclick="setAcres(10)">10 ایکڑ</button>
-    </div>
-  </div>
-
-  <!-- STEP 3: PRICE ADJUSTMENT -->
-  <div class="card">
-    <div class="card-title"><span class="icon">💰</span> فروخت قیمت (فی من)</div>
-    <div class="form-group">
-      <label id="priceLabel">گندم کی قیمت فی من (روپے)</label>
-      <input type="number" id="priceInput" value="4000" oninput="autoCalculate()" placeholder="مثلاً: 4000">
-    </div>
-    <div class="form-group">
-      <label>اضافی اخراجات (روپے، اگر کوئی ہو)</label>
-      <input type="number" id="extraExp" value="0" oninput="autoCalculate()" placeholder="مثلاً: 5000">
-    </div>
-  </div>
-
-  <!-- STEP 4: SHARE RATIO -->
-  <div class="card">
-    <div class="card-title"><span class="icon">🤝</span> حصہ داری</div>
-    <div class="ratio-display">
-      <div class="ratio-box zamindar">
-        <div class="ratio-label">🏠 زمیندار</div>
-        <div class="ratio-val" id="zamindarPct">50%</div>
+    <div class="card-title"><span class="icon">💰</span> زمین اور قیمت</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <label style="font-size:0.82rem;color:var(--text-light);margin-bottom:5px;display:block">ایکڑ (رقبہ)</label>
+        <input type="number" id="acreInput" min="0.5" max="500" step="0.5" value="2" placeholder="ایکڑ" oninput="onAcresChange()" style="padding:12px 14px;font-size:1rem">
       </div>
-      <div class="ratio-box haari">
-        <div class="ratio-label">👨‍🌾 ہاری</div>
-        <div class="ratio-val" id="haariPct">50%</div>
+      <div>
+        <label style="font-size:0.82rem;color:var(--text-light);margin-bottom:5px;display:block" id="priceLabel">قیمت فی من (₨)</label>
+        <input type="number" id="priceInput" value="4000" oninput="autoCalculate();quickBagsCalc()" placeholder="فی من" style="padding:12px 14px;font-size:1rem">
       </div>
     </div>
-    <input type="range" id="shareSlider" min="0" max="100" value="50"
-      oninput="updateRatio(this.value);autoCalculate()"
-      style="--val:50%">
-    <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text-light);margin-top:4px">
-      <span>← ہاری کا حصہ</span>
-      <span>زمیندار کا حصہ →</span>
+    <div class="form-group">
+      <label>بوری کا وزن (کلو)</label>
+      <input type="number" id="bagWeight" value="40" min="1" max="100" oninput="autoCalculate();quickBagsCalc()" placeholder="مثلاً: 40">
+      <div style="font-size:0.72rem;color:var(--text-light);margin-top:4px">گندم ≈ 40 &nbsp;|&nbsp; چاول ≈ 50 &nbsp;|&nbsp; کپاس ≈ 70 کلو فی بوری</div>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
-      <button class="btn btn-outline btn-sm" onclick="setShare(50)">50/50</button>
-      <button class="btn btn-outline btn-sm" onclick="setShare(60)">60/40</button>
-      <button class="btn btn-outline btn-sm" onclick="setShare(33)">33/67</button>
-      <button class="btn btn-outline btn-sm" onclick="setShare(75)">75/25</button>
+
+    <!-- ─── QUICK MAN→BAGS CALCULATOR ─── -->
+    <div style="background:linear-gradient(135deg,#fff8ec,#fdf3e0);border:1.5px solid #f0d080;border-radius:var(--radius-sm);padding:14px;margin-top:4px">
+      <div style="font-size:0.82rem;font-weight:700;color:#8B6914;margin-bottom:10px">🧮 فوری حساب — من سے بوریاں</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <label style="font-size:0.75rem;color:var(--text-light);margin-bottom:4px;display:block">کتنے من اناج؟</label>
+          <input type="number" id="quickMan" min="0" step="0.5" placeholder="مثلاً: 20" oninput="quickBagsCalc()" style="font-size:1rem;padding:10px 12px">
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:var(--text-light);margin-bottom:4px;display:block">من کا ریٹ (روپے)</label>
+          <input type="number" id="quickRate" min="0" placeholder="اوپر سے لے گا" oninput="quickBagsCalc()" style="font-size:1rem;padding:10px 12px">
+        </div>
+      </div>
+      <div id="quickBagsResult" style="display:none;background:white;border-radius:8px;padding:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+          <div style="background:var(--green-pale);border-radius:8px;padding:10px">
+            <div style="font-size:1.3rem;font-weight:700;color:var(--green-dark)" id="qr-bags">-</div>
+            <div style="font-size:0.68rem;color:var(--text-light)">بوریاں</div>
+          </div>
+          <div style="background:var(--gold-light);border-radius:8px;padding:10px">
+            <div style="font-size:1.1rem;font-weight:700;color:#8B6914" id="qr-perbag">-</div>
+            <div style="font-size:0.68rem;color:var(--text-light)">قیمت/بوری</div>
+          </div>
+          <div style="background:#f3f0ff;border-radius:8px;padding:10px">
+            <div style="font-size:1.1rem;font-weight:700;color:#6b4cc4" id="qr-total">-</div>
+            <div style="font-size:0.68rem;color:var(--text-light)">کل رقم</div>
+          </div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-light);text-align:center;margin-top:8px;line-height:1.6" id="qr-formula">—</div>
+      </div>
     </div>
   </div>
 
-  <!-- CALCULATE BUTTON -->
+  <!-- CUSTOM EXPENSES MANAGER -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📋</span> اخراجات — خود ترتیب دیں</div>
+    <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:12px;background:var(--green-pale);padding:8px 12px;border-radius:8px">
+      ✏️ اخراجات کے نام اور رقم خود تبدیل کر سکتے ہیں — یا نئے اخراجات شامل کریں
+    </div>
+    <div id="customExpensesList"></div>
+    <button class="btn btn-outline" onclick="addCustomExpense()" style="margin-top:10px;font-size:0.9rem">
+      ➕ نیا خرچہ شامل کریں
+    </button>
+  </div>
+
+  <!-- shareSlider hidden — default 50/50, kept for JS compatibility -->
+  <input type="hidden" id="shareSlider" value="50">
+
   <button class="btn btn-primary pulse" onclick="calculateAll()" style="margin-bottom:14px;font-size:1.1rem">
     ⚡ حساب لگائیں
   </button>
 
-  <!-- RESULTS -->
   <div class="card fade-in" id="resultsCard" style="display:none">
     <div class="card-title"><span class="icon">📊</span> نتائج</div>
-    
     <div class="result-grid">
       <div class="result-box yield-box">
         <div class="r-label">کل پیداوار</div>
@@ -839,33 +984,37 @@ input[type="range"]::-webkit-slider-thumb {
       </div>
     </div>
 
+    <!-- ══ BAGS / BORI SECTION ══ -->
     <div class="divider"></div>
-    <div class="card-title" style="margin-bottom:10px"><span class="icon">🤝</span> حصہ داری</div>
-    <div class="share-box zamindar-share">
-      <div>
-        <div class="share-name">🏠 زمیندار کا حصہ</div>
-        <div style="font-size:0.75rem;color:#8B6914" id="zamindar-pct-label">50%</div>
+    <div class="card-title" style="margin-bottom:10px"><span class="icon">🎒</span> بوریاں</div>
+    <div style="background:linear-gradient(135deg,#e8f5ed,#d4edda);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div>
+          <div style="font-size:1.6rem">🎒</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--green-dark)" id="res-bags">-</div>
+          <div style="font-size:0.72rem;color:var(--text-light)">کل بوریاں</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem">⚖️</div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--soil)" id="res-bagwt">-</div>
+          <div style="font-size:0.72rem;color:var(--text-light)">کلو/بوری</div>
+        </div>
+        <div>
+          <div style="font-size:1.6rem">💵</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#6b4cc4" id="res-bagprice">-</div>
+          <div style="font-size:0.72rem;color:var(--text-light)">قیمت/بوری</div>
+        </div>
       </div>
-      <div class="share-amount" id="res-zamindar">-</div>
-    </div>
-    <div class="share-box haari-share">
-      <div>
-        <div class="share-name">👨‍🌾 ہاری کا حصہ</div>
-        <div style="font-size:0.75rem;color:var(--green-mid)" id="haari-pct-label">50%</div>
+      <div style="margin-top:10px;background:white;border-radius:8px;padding:10px;font-size:0.82rem;color:var(--text-light);text-align:center">
+        <span id="res-bagsummary">—</span>
       </div>
-      <div class="share-amount" id="res-haari">-</div>
     </div>
-
-    <div class="divider"></div>
-    <div class="card-title" style="margin-bottom:10px"><span class="icon">📋</span> اخراجات کی تفصیل</div>
-    <div id="expenseBreakdown"></div>
 
     <button class="btn btn-gold" onclick="saveRecord()" style="margin-top:12px">
       💾 ریکارڈ محفوظ کریں
     </button>
   </div>
 
-  <!-- FARMING STEPS -->
   <div class="card" id="stepsCard">
     <div class="card-title"><span class="icon">📝</span> کاشتکاری کے مراحل</div>
     <div id="farmingSteps"></div>
@@ -924,40 +1073,208 @@ input[type="range"]::-webkit-slider-thumb {
 <section class="tab-content" id="tab-calc-simple">
   <div class="card">
     <div class="card-title"><span class="icon">🔢</span> کیلکولیٹر</div>
-    <div class="calc-display">
-      <div class="calc-expr" id="calcExpr"></div>
-      <div class="calc-result" id="calcResult">0</div>
+
+    <!-- Display -->
+    <div style="background:#1a2e23;border-radius:14px;padding:16px 20px;margin-bottom:14px;direction:ltr">
+      <div id="calcExpr" style="color:rgba(255,255,255,0.45);font-size:0.9rem;font-family:'Poppins',sans-serif;min-height:22px;text-align:right;letter-spacing:1px"></div>
+      <div id="calcResult" style="color:white;font-size:2.6rem;font-weight:600;font-family:'Poppins',sans-serif;text-align:right;line-height:1.1;word-break:break-all;margin-top:4px">0</div>
     </div>
-    <div class="calc-grid">
-      <button class="calc-btn clear" onclick="calcClear()">C</button>
-      <button class="calc-btn backspace" onclick="calcBack()">⌫</button>
-      <button class="calc-btn op" onclick="calcOp('%')">%</button>
-      <button class="calc-btn op" onclick="calcOp('÷')">÷</button>
 
-      <button class="calc-btn num" onclick="calcNum('7')">7</button>
-      <button class="calc-btn num" onclick="calcNum('8')">8</button>
-      <button class="calc-btn num" onclick="calcNum('9')">9</button>
-      <button class="calc-btn op" onclick="calcOp('×')">×</button>
+    <!-- Buttons -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;direction:ltr">
 
-      <button class="calc-btn num" onclick="calcNum('4')">4</button>
-      <button class="calc-btn num" onclick="calcNum('5')">5</button>
-      <button class="calc-btn num" onclick="calcNum('6')">6</button>
-      <button class="calc-btn op" onclick="calcOp('-')">−</button>
+      <!-- Row 1 -->
+      <button onclick="calcClear()"
+        style="background:#e53935;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.1rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(229,57,53,0.3)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">C</button>
+      <button onclick="calcBack()"
+        style="background:#f5ede6;color:#8B5E3C;border:none;border-radius:12px;padding:20px 8px;font-size:1.2rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">⌫</button>
+      <button onclick="calcOp('%')"
+        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.2rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">%</button>
+      <button onclick="calcOp('÷')"
+        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.3rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">÷</button>
 
-      <button class="calc-btn num" onclick="calcNum('1')">1</button>
-      <button class="calc-btn num" onclick="calcNum('2')">2</button>
-      <button class="calc-btn num" onclick="calcNum('3')">3</button>
-      <button class="calc-btn op" onclick="calcOp('+')">+</button>
+      <!-- Row 2 -->
+      <button onclick="calcNum('7')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">7</button>
+      <button onclick="calcNum('8')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">8</button>
+      <button onclick="calcNum('9')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">9</button>
+      <button onclick="calcOp('×')"
+        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.3rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">×</button>
 
-      <button class="calc-btn num zero" onclick="calcNum('0')">0</button>
-      <button class="calc-btn num" onclick="calcNum('.')">.</button>
-      <button class="calc-btn eq" onclick="calcEquals()">=</button>
+      <!-- Row 3 -->
+      <button onclick="calcNum('4')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">4</button>
+      <button onclick="calcNum('5')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">5</button>
+      <button onclick="calcNum('6')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">6</button>
+      <button onclick="calcOp('-')"
+        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.5rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">−</button>
+
+      <!-- Row 4 -->
+      <button onclick="calcNum('1')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">1</button>
+      <button onclick="calcNum('2')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">2</button>
+      <button onclick="calcNum('3')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">3</button>
+      <button onclick="calcOp('+')"
+        style="background:#4caf73;color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.4rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 3px 8px rgba(76,175,115,0.3)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">+</button>
+
+      <!-- Row 5 -->
+      <button onclick="calcNum('0')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.35rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;grid-column:span 2"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">0</button>
+      <button onclick="calcNum('.')"
+        style="background:#eef2f0;color:#1a2e23;border:none;border-radius:12px;padding:20px 8px;font-size:1.5rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">.</button>
+      <button onclick="calcEquals()"
+        style="background:linear-gradient(135deg,#2d8a4e,#1a5c2e);color:white;border:none;border-radius:12px;padding:20px 8px;font-size:1.4rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all 0.1s;box-shadow:0 4px 14px rgba(26,92,46,0.4)"
+        ontouchstart="this.style.transform='scale(0.93)'" ontouchend="this.style.transform='scale(1)'">=</button>
     </div>
   </div>
   <div class="dev-footer">Developed by Muhammad Usman</div>
 </section>
 
 <script>
+// ══════════════════════════════════════════════════
+// INLINE MANIFEST (no manifest.json file needed)
+// ══════════════════════════════════════════════════
+(function injectManifest() {
+  try {
+    const manifest = {
+      name: 'زمین حساب — Zameen Hisab',
+      short_name: 'زمین حساب',
+      description: 'اپنی زمین اور فصل کا مکمل حساب آسانی سے کریں',
+      start_url: './',
+      display: 'standalone',
+      orientation: 'portrait',
+      background_color: '#1a5c2e',
+      theme_color: '#1a5c2e',
+      lang: 'ur',
+      icons: [{
+        src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%231a5c2e'/><text x='50%' y='55%' font-size='110' text-anchor='middle' dominant-baseline='middle'>🌱</text></svg>",
+        sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable'
+      }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('link');
+    link.rel = 'manifest'; link.href = url;
+    document.head.appendChild(link);
+  } catch(e) {}
+})();
+
+// ══════════════════════════════════════════════════
+// SERVICE WORKER — INLINE BLOB
+// No external sw.js needed. Works on GitHub Pages,
+// direct file open, Claude preview — everywhere.
+// ══════════════════════════════════════════════════
+(function registerInlineSW() {
+  if (!('serviceWorker' in navigator)) return;
+
+  const SW_CODE = `
+const CACHE = 'zameen-hisab-v2';
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])).catch(()=>{}));
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+    ).then(()=>self.clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && res.status === 200 && res.type !== 'opaque') {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => cached || new Response('Offline', {status:503}));
+    })
+  );
+});
+`;
+
+  try {
+    const blob = new Blob([SW_CODE], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl, { scope: '/' })
+      .then(() => console.log('✅ Inline SW registered'))
+      .catch(() => {/* silent — scoping restrictions on some hosts */});
+  } catch(e) { /* silent */ }
+})();
+
+// ══════════════════════════════════════════════════
+// PWA INSTALL PROMPT
+// ══════════════════════════════════════════════════
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Show install banner after 3 seconds
+  setTimeout(() => {
+    document.getElementById('installPrompt').classList.add('show');
+  }, 3000);
+});
+
+function installPWA() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(result => {
+    deferredInstallPrompt = null;
+    document.getElementById('installPrompt').classList.remove('show');
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installPrompt').classList.remove('show');
+  deferredInstallPrompt = null;
+});
+
+// ══════════════════════════════════════════════════
+// OFFLINE / ONLINE DETECTION
+// ══════════════════════════════════════════════════
+function updateOnlineStatus() {
+  const banner = document.getElementById('offlineBanner');
+  if (!navigator.onLine) {
+    banner.classList.add('show');
+    // Push content down so banner doesn't overlap header
+    document.querySelector('.app-header').style.top = '36px';
+  } else {
+    banner.classList.remove('show');
+    document.querySelector('.app-header').style.top = '0';
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus(); // run on load
+
 // ══════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════
@@ -1098,33 +1415,28 @@ const TIPS = [
 // STATE
 // ══════════════════════════════════════════════════
 let currentCrop = 'wheat';
-let calcExpr = '';
-let calcCurrent = '0';
-let calcNewNum = true;
-let calcOper = null;
-let calcPrev = null;
+// customExpenses: array of {id, name, amount} — editable rows
+let customExpenses = [];
 
+// ── localStorage helpers ──────────────────────────
 function getStorage(key) { try { return JSON.parse(localStorage.getItem(key)||'null'); } catch(e){ return null; } }
 function setStorage(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){} }
 
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
-window.onload = () => {
-  // Date
+window.addEventListener('DOMContentLoaded', () => {
   const d = new Date();
   document.getElementById('headerDate').textContent =
     d.toLocaleDateString('ur-PK', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
-  // Tip
   document.getElementById('dailyTip').textContent = TIPS[d.getDate() % TIPS.length];
-  // Init steps
+  // Init custom expenses from crop defaults
+  initCustomExpenses();
   renderSteps();
-  // Load notes & history
   renderNotes();
   renderHistory();
-  // Auto-calc
   autoCalculate();
-};
+});
 
 // ══════════════════════════════════════════════════
 // TAB SWITCHING
@@ -1150,7 +1462,7 @@ function setNavByIndex(i) {
 }
 
 // ══════════════════════════════════════════════════
-// LANGUAGE
+// LANGUAGE TOGGLE
 // ══════════════════════════════════════════════════
 function setLang(l) {
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
@@ -1169,28 +1481,97 @@ function selectCrop(crop, el) {
     `${c.emoji} ${c.name} — فی ایکڑ پیداوار: ${c.yieldMin}-${c.yieldMax} من | موسم: ${c.season}`;
   document.getElementById('priceLabel').textContent = `${c.name} کی قیمت فی من (روپے)`;
   document.getElementById('priceInput').value = c.defaultPrice;
+  // Update bag weight hint default
+  const bagDefaults = {wheat:40,rice:50,cotton:70,maize:50,sugarcane:50,mustard:40};
+  document.getElementById('bagWeight').value = bagDefaults[crop] || 40;
   document.getElementById('resultsCard').style.display = 'none';
+  initCustomExpenses();
   renderSteps();
   autoCalculate();
 }
 
-function setAcres(n) {
-  document.getElementById('acreInput').value = n;
-  autoCalculate();
-}
-
 function setShare(z) {
-  document.getElementById('shareSlider').value = z;
-  updateRatio(z);
-  autoCalculate();
+  const s = document.getElementById('shareSlider');
+  if (s) { s.value = z; }
 }
 
 function updateRatio(v) {
-  const zPct = parseInt(v);
-  const hPct = 100 - zPct;
-  document.getElementById('zamindarPct').textContent = zPct + '%';
-  document.getElementById('haariPct').textContent = hPct + '%';
-  document.getElementById('shareSlider').style.setProperty('--val', zPct + '%');
+  // UI elements removed — keep hidden input in sync only
+  const s = document.getElementById('shareSlider');
+  if (s) s.value = v;
+}
+
+// ══════════════════════════════════════════════════
+// CUSTOM EXPENSES MANAGER
+// ══════════════════════════════════════════════════
+function initCustomExpenses() {
+  // Load crop defaults as editable rows
+  const c = CROPS[currentCrop];
+  const acres = parseFloat(document.getElementById('acreInput').value) || 2;
+  customExpenses = Object.entries(c.costs).map(([name, perAcre], i) => ({
+    id: i + 1,
+    name,
+    perAcre,
+    amount: Math.round(perAcre * acres)
+  }));
+  renderCustomExpenses();
+}
+
+function renderCustomExpenses() {
+  const acres = parseFloat(document.getElementById('acreInput').value) || 1;
+  const el = document.getElementById('customExpensesList');
+  if (!el) return;
+  el.innerHTML = customExpenses.map(exp => `
+    <div class="custom-exp-row" id="exprow-${exp.id}">
+      <input type="text" value="${exp.name}" placeholder="خرچے کا نام"
+        onchange="updateExpName(${exp.id},this.value)"
+        style="font-size:0.82rem;padding:8px 10px">
+      <input type="number" value="${exp.amount}" placeholder="رقم"
+        onchange="updateExpAmt(${exp.id},this.value);autoCalculate()"
+        oninput="updateExpAmt(${exp.id},this.value);autoCalculate()"
+        style="font-size:0.88rem;padding:8px 10px">
+      <button class="del-exp-btn" onclick="deleteExp(${exp.id})">🗑</button>
+    </div>
+  `).join('');
+}
+
+function updateExpName(id, val) {
+  const exp = customExpenses.find(e => e.id === id);
+  if (exp) exp.name = val;
+}
+function updateExpAmt(id, val) {
+  const exp = customExpenses.find(e => e.id === id);
+  if (exp) exp.amount = parseFloat(val) || 0;
+}
+function deleteExp(id) {
+  customExpenses = customExpenses.filter(e => e.id !== id);
+  renderCustomExpenses();
+  autoCalculate();
+}
+function addCustomExpense() {
+  const newId = Date.now();
+  customExpenses.push({ id: newId, name: 'نیا خرچہ', amount: 0 });
+  renderCustomExpenses();
+  // Focus the new name field
+  setTimeout(() => {
+    const row = document.getElementById('exprow-' + newId);
+    if (row) row.querySelector('input[type="text"]').focus();
+  }, 50);
+}
+
+// Re-init expense amounts when acres change
+function onAcresChange() {
+  const acres = parseFloat(document.getElementById('acreInput').value) || 1;
+  // Only update amounts for expenses that still match default per-acre values
+  const c = CROPS[currentCrop];
+  const defaults = Object.entries(c.costs);
+  customExpenses.forEach((exp, i) => {
+    if (i < defaults.length) {
+      exp.amount = Math.round(defaults[i][1] * acres);
+    }
+  });
+  renderCustomExpenses();
+  autoCalculate();
 }
 
 // ══════════════════════════════════════════════════
@@ -1213,9 +1594,7 @@ function renderSteps() {
 // ══════════════════════════════════════════════════
 // CALCULATIONS
 // ══════════════════════════════════════════════════
-function fmt(n) {
-  return n.toLocaleString('en-PK');
-}
+function fmt(n) { return n.toLocaleString('en-PK'); }
 
 function autoCalculate() {
   const acres = parseFloat(document.getElementById('acreInput').value) || 0;
@@ -1226,29 +1605,22 @@ function autoCalculate() {
 function calculateAll() {
   const acres = parseFloat(document.getElementById('acreInput').value) || 0;
   const price = parseFloat(document.getElementById('priceInput').value) || 0;
-  const extraExp = parseFloat(document.getElementById('extraExp').value) || 0;
-  const zShare = parseFloat(document.getElementById('shareSlider').value) / 100;
-  const hShare = 1 - zShare;
+  const bagWeightKg = parseFloat(document.getElementById('bagWeight').value) || 40;
 
-  if (acres <= 0) { alert('ایکڑ درج کریں'); return; }
+  if (acres <= 0) return;
 
   const c = CROPS[currentCrop];
   const avgYield = (c.yieldMin + c.yieldMax) / 2;
-  const totalYield = (avgYield * acres).toFixed(1);
-  const revenue = parseFloat(totalYield) * price;
-
-  // Costs
-  const costPerAcre = Object.values(c.costs).reduce((a, b) => a + b, 0);
-  const totalCost = (costPerAcre * acres) + extraExp;
+  const totalYieldMan = parseFloat((avgYield * acres).toFixed(1));
+  const totalYieldKg = totalYieldMan * 40;
+  const totalBags = Math.floor(totalYieldKg / bagWeightKg);
+  const pricePerBag = Math.round((bagWeightKg / 40) * price);
+  const revenue = totalYieldMan * price;
+  const totalCost = customExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
   const profit = revenue - totalCost;
 
-  // Shares (based on profit, or revenue if loss)
-  const shareBase = profit > 0 ? profit : revenue;
-  const zamindarAmt = profit > 0 ? (profit * zShare) : 0;
-  const haariAmt = profit > 0 ? (profit * hShare) : 0;
-
-  // Update results
-  document.getElementById('res-yield').textContent = totalYield;
+  // Update main results
+  document.getElementById('res-yield').textContent = totalYieldMan;
   document.getElementById('res-cost').textContent = '₨' + fmt(Math.round(totalCost));
   document.getElementById('res-revenue').textContent = '₨' + fmt(Math.round(revenue));
 
@@ -1268,31 +1640,14 @@ function calculateAll() {
   }
   document.getElementById('res-profit').textContent = (profit >= 0 ? '₨' : '−₨') + fmt(Math.round(Math.abs(profit)));
 
-  const zPct = Math.round(zShare * 100);
-  const hPct = 100 - zPct;
-  document.getElementById('zamindar-pct-label').textContent = zPct + '% حصہ';
-  document.getElementById('haari-pct-label').textContent = hPct + '% حصہ';
-  document.getElementById('res-zamindar').textContent = profit > 0 ? '₨' + fmt(Math.round(zamindarAmt)) : '—';
-  document.getElementById('res-haari').textContent = profit > 0 ? '₨' + fmt(Math.round(haariAmt)) : '—';
+  // Bags section
+  document.getElementById('res-bags').textContent = totalBags;
+  document.getElementById('res-bagwt').textContent = bagWeightKg + ' کلو';
+  document.getElementById('res-bagprice').textContent = '₨' + fmt(pricePerBag);
+  document.getElementById('res-bagsummary').innerHTML =
+    `${totalYieldMan} من × 40 کلو = ${totalYieldKg} کلو<br>` +
+    `${totalYieldKg} کلو ÷ ${bagWeightKg} کلو = <strong>${totalBags} بوریاں</strong> | ہر بوری: ₨${fmt(pricePerBag)}`;
 
-  // Expense breakdown
-  const breakdown = Object.entries(c.costs).map(([k, v]) => `
-    <div class="expense-row">
-      <span class="exp-name">${k}</span>
-      <span class="exp-val">₨${fmt(Math.round(v * acres))}</span>
-    </div>
-  `).join('') + (extraExp > 0 ? `
-    <div class="expense-row">
-      <span class="exp-name">اضافی اخراجات</span>
-      <span class="exp-val">₨${fmt(Math.round(extraExp))}</span>
-    </div>
-  ` : '') + `
-    <div class="expense-row" style="background:var(--soil-light);border-radius:8px;padding:10px;margin-top:4px">
-      <span class="exp-name" style="font-weight:700;color:var(--soil)">کل اخراجات</span>
-      <span class="exp-val" style="color:var(--soil)">₨${fmt(Math.round(totalCost))}</span>
-    </div>
-  `;
-  document.getElementById('expenseBreakdown').innerHTML = breakdown;
   document.getElementById('resultsCard').style.display = 'block';
 
   // Update dashboard
@@ -1301,6 +1656,51 @@ function calculateAll() {
   const dashProfit = document.getElementById('dash-profit');
   dashProfit.textContent = (profit >= 0 ? '+' : '') + fmt(Math.round(profit/1000)) + 'K';
   dashProfit.style.color = profit >= 0 ? '#a8e6be' : '#ffb3b3';
+
+  // Also refresh quick bags calc if it has a value
+  quickBagsCalc();
+}
+
+// ══════════════════════════════════════════════════
+// QUICK MAN → BAGS CALCULATOR
+// Independent tool: enter any man count → get bags + price
+// ══════════════════════════════════════════════════
+function quickBagsCalc() {
+  const manInput = document.getElementById('quickMan');
+  const rateInput = document.getElementById('quickRate');
+  if (!manInput) return;
+
+  const man = parseFloat(manInput.value) || 0;
+  // Use quickRate if filled, otherwise fall back to priceInput
+  const priceEl = document.getElementById('priceInput');
+  const rate = parseFloat(rateInput.value) || parseFloat(priceEl ? priceEl.value : 0) || 0;
+  const bagKg = parseFloat(document.getElementById('bagWeight').value) || 40;
+
+  // Auto-fill quickRate placeholder from price input
+  if (priceEl && !rateInput.value) {
+    rateInput.placeholder = priceEl.value ? `خودکار: ${priceEl.value}` : 'ریٹ درج کریں';
+  }
+
+  const resultEl = document.getElementById('quickBagsResult');
+  if (!resultEl) return;
+
+  if (man <= 0) { resultEl.style.display = 'none'; return; }
+
+  const totalKg = man * 40; // 1 man (Pakistani) = 40 kg
+  const bags = Math.floor(totalKg / bagKg);
+  const remainKg = totalKg % bagKg;
+  const pricePerBag = rate > 0 ? Math.round((bagKg / 40) * rate) : 0;
+  const totalValue = rate > 0 ? Math.round(man * rate) : 0;
+
+  document.getElementById('qr-bags').textContent = bags + (remainKg > 0 ? ` + ${remainKg}کلو` : '');
+  document.getElementById('qr-perbag').textContent = rate > 0 ? '₨' + fmt(pricePerBag) : '—';
+  document.getElementById('qr-total').textContent = rate > 0 ? '₨' + fmt(totalValue) : '—';
+  document.getElementById('qr-formula').innerHTML =
+    `${man} من × 40 = ${totalKg} کلو &nbsp;÷&nbsp; ${bagKg} کلو = <strong>${bags} بوریاں</strong>` +
+    (remainKg > 0 ? ` + ${remainKg} کلو بچا` : '') +
+    (rate > 0 ? `<br>کل قیمت: ${man} من × ₨${fmt(rate)} = ₨${fmt(totalValue)}` : '');
+
+  resultEl.style.display = 'block';
 }
 
 // ══════════════════════════════════════════════════
@@ -1309,14 +1709,15 @@ function calculateAll() {
 function saveRecord() {
   const acres = document.getElementById('acreInput').value;
   const price = document.getElementById('priceInput').value;
-  const extraExp = document.getElementById('extraExp').value || 0;
+  const bagWeightKg = parseFloat(document.getElementById('bagWeight').value) || 40;
   const zShare = document.getElementById('shareSlider').value;
   const c = CROPS[currentCrop];
   const avgYield = ((c.yieldMin + c.yieldMax) / 2) * acres;
   const revenue = avgYield * price;
-  const costPerAcre = Object.values(c.costs).reduce((a,b)=>a+b,0);
-  const totalCost = costPerAcre * acres + parseFloat(extraExp);
+  const totalCost = customExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
   const profit = revenue - totalCost;
+  const totalYieldKg = avgYield * 40;
+  const totalBags = Math.floor(totalYieldKg / bagWeightKg);
 
   const records = getStorage('kp_records') || [];
   records.unshift({
@@ -1327,10 +1728,13 @@ function saveRecord() {
     cropEmoji: c.emoji,
     acres, price,
     yield: avgYield.toFixed(1),
+    bags: totalBags,
+    bagWeightKg,
     cost: Math.round(totalCost),
     revenue: Math.round(revenue),
     profit: Math.round(profit),
-    zShare
+    zShare,
+    expenses: JSON.parse(JSON.stringify(customExpenses))
   });
   setStorage('kp_records', records);
   renderHistory();
@@ -1350,6 +1754,7 @@ function renderHistory() {
       <div class="h-crop">${r.cropEmoji} ${r.cropName} — ${r.acres} ایکڑ</div>
       <div class="h-stats">
         <div class="h-stat">پیداوار: <span>${r.yield} من</span></div>
+        ${r.bags ? `<div class="h-stat">بوریاں: <span>🎒 ${r.bags}</span></div>` : ''}
         <div class="h-stat">اخراجات: <span>₨${fmt(r.cost)}</span></div>
         <div class="h-stat" style="color:${r.profit>=0?'var(--green-mid)':'var(--red)'}">
           ${r.profit>=0?'منافع':'نقصان'}: <span>₨${fmt(Math.abs(r.profit))}</span>
@@ -1369,6 +1774,7 @@ function loadRecord(id) {
   if (!r) return;
   document.getElementById('acreInput').value = r.acres;
   document.getElementById('priceInput').value = r.price;
+  if (r.bagWeightKg) document.getElementById('bagWeight').value = r.bagWeightKg;
   document.getElementById('shareSlider').value = r.zShare;
   updateRatio(r.zShare);
   currentCrop = r.crop;
@@ -1378,6 +1784,13 @@ function loadRecord(id) {
   });
   const c = CROPS[r.crop];
   document.getElementById('cropInfoBanner').innerHTML = `${c.emoji} ${c.name} — فی ایکڑ پیداوار: ${c.yieldMin}-${c.yieldMax} من`;
+  // Restore saved expenses if available
+  if (r.expenses && r.expenses.length) {
+    customExpenses = JSON.parse(JSON.stringify(r.expenses));
+  } else {
+    initCustomExpenses();
+  }
+  renderCustomExpenses();
   renderSteps();
   showTab('calculator');
   setNavByIndex(1);
@@ -1485,8 +1898,6 @@ function calcBack() {
   cVal = cVal.slice(0,-1);
   document.getElementById('calcResult').textContent = cVal;
 }
-
-function fmt(n) { return n.toLocaleString('en-PK'); }
 </script>
 </body>
 </html>
